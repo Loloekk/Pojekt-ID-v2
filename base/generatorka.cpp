@@ -239,22 +239,22 @@ int rnd(int a, int b){
 }
 
 vector<string> ulice = {
-    "Bajeczna","Piastowska","Kamieńska","Cicha","Krótka","Długa","Czerwona","Mickiewicza","Brodzińskiego","Praska",
-    "Waryńskiego","Wokulskiego","Kmicica","Wołodyjowskiego","Kiemlicza","Zagłoby","Trawiasta","Mokra","Sucha","Szeroka",
-    "Wiejska","Chwalebna","Jerozolimska","Krakowska","Narutowicza","Lwowska","Wałowa","Bema","Matejki","Mościckiego",
-    "Józefowicza","Walentego","Konopnickiej","Bernardyńska","Elektryczna","Azotowa","Śliwy",
+    "Bajeczna","Piastowska","Kamienna","Cicha","Krajowa","Dolna","Czerwona","Mickiewicza","Brodzikowa","Praska",
+    "Warna","Wokulskiego","Kmicica","Sienkiewicza","Kiemlicza","Ketlinga","Trawiasta","Mokra","Sucha","Szeroka",
+    "Wiejska","Chwalebna","Jerozolimska","Krakowska","Narutowicza","Lwowska","Walna","Bema","Matejki","Mostowa",
+    "Jeziorna","Walentego","Konopnickiej","Bernardyna","Elektryczna","Azotowa","Sowia",
 };
 vector<string> imiona = {
-"Jan","Marian","Kazimierz","Barnaba","Piotr","Maciej","Kacper","Krystian","Cezary","Paweł","Tomasz","Marek",
-"Kamil","Bogdan","Teofil","Grzegorz","Rafał","Filip","Krzysztof","Czesław","Wincenty","Władysław","Arkadiusz",
-"Maria","Anna","Kamila","Małorzata","Agata","Zofia","Zuzanna","Laura","Hanna","Oliwa","Julia","Bogusława",
+"Jan","Marian","Kazimierz","Barnaba","Piotr","Maciej","Kacper","Krystian","Cezary","Krystian","Tomasz","Marek",
+"Kamil","Bogdan","Teofil","Grzegorz","Romuald","Filip","Krzysztof","Gabriel","Wincenty","Wojciech","Arkadiusz",
+"Maria","Anna","Kamila","Hiacynt","Agata","Zofia","Zuzanna","Laura","Hanna","Oliwa","Julia","Balbina",
 "Jadwiga","Izabela","Aleksandra","Wiktoria","Wanda","Alicja","Zuzanna","Ewa","Magdalena","Natalia","Dorota",
 };
 vector<string> nazwiska = {
-  "Nowak","Kowal","Steiner","Wiśniewicz","Wojtar","Kowalczyk","Kamień","Zieleń","Dąb","Szulc",
-  "Mazurek","Lis","Kot","Mak","Przybyło","Duda","Niemen","Mickiewicz","Mróz","Wilk","Pawlak",
-  "Szewczyk","Kaczmarek","Woźniak","Krawczyk","Sikora","Zięba","Dudek","Wróbel","Kozioł","Czech",
-  "Potok","Mazur","Wieczorek","Piątek","Kwiecień","Stelarz","Sążeń",
+  "Nowak","Kowal","Steiner","Poziomka","Wojtar","Kowalczyk","Boryna","Zimno","Buk","Szulc",
+  "Mazurek","Lis","Kot","Mak","Odra","Duda","Niemen","Mickiewicz","Miazga","Wilk","Pawlak",
+  "Szewczyk","Kaczmarek","Kareta","Krawczyk","Sikora","Rudzik","Dudek","Kos","Koza","Czech",
+  "Potok","Mazur","Wieczorek","Czwartek","Maj","Stelarz","Wiorsta",
 };
 vector<string> przymiotnik = {
     "ekstra","mega","czerwony","zielony","czarny","ultra","super","niebieski","limonkowy","dzielny","dumny",
@@ -317,6 +317,7 @@ string genLokalizacja(string miasto);
 bool czyKobieta(osoba);
 vector<string> tokenize(string, char);
 void printEverything();
+void odbierzPaczke(int zlecenie, string data_dostarczenia, string data_odbioru);
 
 vector<osoba> OSOBY;
 vector<stanowisko_osoba> STANOWISKA_OSOBY;
@@ -339,8 +340,8 @@ vector<rodzaj_pojazdu> RODZAJE_POJAZDOW = {
     {1,"Ford Transit", 750, 1},
     {2,"Mercedes Sprinter", 775, 1},
     {3,"Volkswagen Crafter", 900, 1},
-    {4,"Tir większy", 4500, 4},
-    {5,"Tir mniejszy", 3000, 4},
+    {4,"Tir XXL", 4500, 4},
+    {5,"Tir XL", 3000, 4},
 };
 vector<stanowisko> STANOWISKA = {
     {1,"dyrektor"},{2,"kierowca"},{3,"komisjoner"},{4,"informatyk"},
@@ -350,9 +351,9 @@ vector<uprawnienie> UPRAWNIENIA = {
 };
 vector<rodzaje_przegladow> RODZAJE_PRZEGLADOW = {
     {1,"Wymiana oleju"},
-    {2,"Wymiana płynu hamulcowego"},
-    {3,"Wymiana płynu do spryskiwaczy"},
-    {4,"Wymiana płynu chłodniczego"},
+    {2,"Wymiana plynu hamulcowego"},
+    {3,"Wymiana plynu do spryskiwaczy"},
+    {4,"Wymiana plynu chlodniczego"},
     {5,"Wymiana tarczy hamulcowych"},
     {6,"Wymiana opon"},
 };
@@ -722,6 +723,7 @@ int main(){
                                 if(id_z == zlecenie){   
                                     data_dost = dataP; 
                                     data_odeb = obecna_data(czasP + rnd(5*MINUTA,2*GODZINA));
+                                    odbierzPaczke(zlecenie, data_dost, data_odeb);
                                     break;
                                 }
                             }
@@ -1152,4 +1154,15 @@ int potrzebneUprawnienie(int pojazd_rodzaj){
     }
     assert(false);
     return -1;
+}
+
+void odbierzPaczke(int zlecenie, string data_dostarczenia, string data_odbioru){
+    for(auto &[id_z,id_s,data_dost,data_odeb] : ODBIORY){
+        if(id_z == zlecenie){
+            data_dost = data_dostarczenia;
+            data_odeb = data_odbioru;
+            return;
+        }
+    }
+    assert(false && "Nie znaleziono paczki");
 }
