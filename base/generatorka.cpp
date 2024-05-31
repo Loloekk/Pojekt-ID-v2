@@ -719,14 +719,9 @@ int main(){
                         int zlecenie = *it;
                         // Wsadzamy paczke do paczkomatu/skrytki - zaznaczamy to w ODBIORY
                         {
-                            for(auto &[id_z,id_s,data_dost,data_odeb] : ODBIORY){
-                                if(id_z == zlecenie){   
-                                    data_dost = dataP; 
-                                    data_odeb = obecna_data(czasP + rnd(5*MINUTA,2*GODZINA));
-                                    odbierzPaczke(zlecenie, data_dost, data_odeb);
-                                    break;
-                                }
-                            }
+                            string data_dost = dataP;
+                            string data_odeb = obecna_data(czasP + rnd(5*MINUTA,2*GODZINA));
+                            odbierzPaczke(zlecenie,data_dost,data_odeb);
                         }
                         ZLECENIA_KURSY.pb({zlecenie, kursId, dataP});
                         it = pojazdZlecenia[pojazdId].erase(it);
