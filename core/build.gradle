@@ -1,0 +1,22 @@
+sourceCompatibility = 1.8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+sourceSets.main.java.srcDirs = [ "src/" ]
+
+eclipse.project.name = appName + "-core"
+
+dependencies {
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+    implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+    // Add these lines if not present
+    implementation "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+}
+dependencies {
+    implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+}

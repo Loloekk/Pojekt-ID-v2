@@ -1,0 +1,69 @@
+\documentclass{article} % This command is used to set the type of document you are working on such as an article, book, or presenation
+
+\usepackage{geometry} % This package allows the editing of the page layout
+\usepackage{amsmath}  % This package allows the use of a large range of mathematical formula, commands, and symbols
+\usepackage{graphicx}  % This package allows the importing of images
+\usepackage[polish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+
+\newcommand{\maketitletwo}[2][]{\begin{center}
+        \Large{\textbf{SzybkaPaczka}} % Name of course here
+        \vspace{5pt}
+        
+        \normalsize{Jacek Markiewicz, Karol Bielaszka % Your name here
+        
+        \today}        % Change to due date if preferred
+        \vspace{15pt}
+        
+\end{center}}
+\begin{document}
+    \maketitletwo[5] 
+    
+\section*{Tematyka i założone cele}
+\noindent Tematem projektu jest baza danych dla firmy przewożącej paczki pomiędzy paczkomatami. Baza przechowuje informacje dotyczące klientów, pracowników, pojazdów oraz przesyłanych paczek. Aplikacja będzie udostępniać interfejs umożliwijący komunikację pomiędzy bazą a klientami, kurierami i aplikacją do zarządzania logistyką (aplikacji logistycznej nie będziemy implementować). 
+\section*{Schemat bazy}
+    Schemat bazy możemy podzielić na trzy główne części:
+    \begin{enumerate}
+        \item \textbf{Osoby} - składa się z osób, uprawnień jakie posiadają, stanowisk jakich pracują oraz informacji o stawieniu się pracownika w pracy i zakończeniu pracy w danym dniu.
+        \item \textbf{Pojazdy} - składa się z pojazdów, które posiada firma, ich rodzajów, pojemności, wymaganych serwisów (uzależnionych od rodzaju pojazdu), przeprowadzonych serwisów, usterek i ich napraw oraz wymaganych uprawnień do prowadzenia pojazdu.
+        \item \textbf{Zlecenia i kursy} - składają się z informacji o zleceniach i transporcie paczek pomiędzy paczkomatami. Dokładny opis przewozu paczki znajduje się poniżej.
+    \end{enumerate}
+\noindent 
+\section*{Historia zlecenia}
+    \begin{enumerate}
+        \item Zgłoszenie zlecenia przez klienta, odnotowane w tabeli zlecenia;
+        \item Włożenie paczki przez klienta do skrytki, odnotowane w nadaniach;
+        \item Zabranie paczki przez kuriera (odnotowane w zlecenia\_kursy) i przewiezienie do magazynu (odnotowane w zlecenia\_magazyny) do którego przynależy dany paczkomat;
+        \item Następnie kilkukrotne przewiezenie paczki pomiędzy różnymi magazynami (odnotowane w zlecenia\_kursy i zlecenia\_magazyny);
+        \item W międzyczasie aplikacja logistyczna rezerwuje pustą skrytkę w paczkomacie, do którego ma trafić przesyłka (odnotowane w odbiory, obie daty równe NULL, jest to równoznaczne z zarezerwowaniem skrytki na dane zlecenie);
+        \item Zawiezienie paczki do odpowiedniego paczkomatu i włożenie paczki do zarezerwowanej skrytki (odnotowane w odbiory jako data\_dostarczenia);
+        \item Odebranie paczki z paczkomatu przez odbiorcę (odnotowane w odbiory jako data\_odbioru).
+    \end{enumerate}
+\section*{Historia kursu}
+    \begin{enumerate}
+        \item Warstwa logistyczna tworzy zlecenie do którego przyporządkowuje magazyn początkowy (magazyn\_start), magazyn docelowy, kierowcę i pojazd znajdujących się w magazynie\_start, każdy kurs odbywa się pomiędzy dwoma magazynami (być może między jednym i tym samym);
+        \item Do pojazdu przypisanego do kursu zostają zapakowane odpowiednie paczki (odnotowane w zlecenia\_kursy);
+        \item Kurs wyjeżdża z magazynu (odnotowane w kursy jako data\_wyjazdu);
+        \item Jeżeli kurs zbiera/rozwozi paczki z/do paczkomatów:
+            \begin{itemize}
+                \item Kurs zatrzymuje się przy paczkomacie (odnotowane w kursy\_paczkomaty jako data\_przyjazdu);
+                \item Następuje przepakowanie odpowiednich paczek (odnotowane w zlecenia\_kursy lub odbiory);
+                \item Kurs odjeżdża od paczkomatu i rusza w dalszą trasę (odnotowane w kursy\_paczkomaty jako data\_odjazdu);
+            \end{itemize}
+        \item Kurs przyjeżdża do docelowego magazynu (odnotowane w kurs jako data\_przyjazdu);
+        \item Następuje wypakowanie wszystkich paczek do magazynu (odnotowane w zlecenia\_magazyny);
+        \item Kierowca deklaruje, że cały pojazd został rozpakowany (odnotowane w deklaracja\_wypakowan), nie możemy tego wnioskować z tabeli zlecenia\_magazyny, ponieważ paczka mogła się zgubić podczas transportu.
+    \end{enumerate}
+\section*{Problemy i postawione założenia}
+	\begin{itemize}
+	\item Zdecydowaliśmy nie zajmować się systemem wypłat, oraz harmonogramem pracowników.
+	\item Początkowo chcieliśmy trzymać graf magazynów i obliczać optymalną trasę dla każdego zlecenia, jednak zdecydowaliśmy pozostawić to warstwie logistycznej, która mogła by pracować na naszej bazie.				
+    \item Zakładamy, że każdy magazyn może pomieścić nieskończoną liczbę paczek.
+    \item Zakładamy, że pesel jest niezmienialny.
+	\item Zakładamy, że rejestracja pojazdu jest niezmienialna.
+	\item Jeśli pojazd z pewnych przyczyn zniknie (np. zostanie ukradziony w trakcie odbywania kursu) to jest to traktowane jako usterka (której naprawą jest odzyskanie pojazdu). 
+	\end{itemize}
+\section*{Plany}
+    Wprowadzimy indeksy do wyszukiwania id\_zlecenia, w większości tabel je zawierających, być może również id\_osoby lub (id\_osoby,id\_magazynu) do praca\_osoby i id\_pojazdu do serwis. Rozpatrzymy również dodanie perspektyw w celu ułatwienia dostępu do danych w bazie. Rozważymy wprowadzenie zmienialnej rejestracji pojazdów.
+\end{document}
