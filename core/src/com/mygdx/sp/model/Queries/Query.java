@@ -4,8 +4,8 @@ package com.mygdx.sp.model.Queries;
 import java.util.List;
 
 public interface Query {
-    String getQuery(List<String> args);
-    Boolean check(List<String> args);
+    String getQuery(List<TurboString> args);
+    Boolean check(List<TurboString> args);
     List<String> getFields();
     String toString();
 }

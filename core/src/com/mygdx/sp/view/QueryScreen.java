@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.sp.model.Queries.Query;
+import com.mygdx.sp.model.Queries.TurboString;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -93,10 +94,10 @@ public class QueryScreen implements Screen
         buttonSubmit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                List<String> input = new ArrayList<>();
+                List<TurboString> input = new ArrayList<>();
                 for(TextField textField : list)
                 {
-                    input.add(textField.getText());
+                    input.add(new TurboString(textField.getText()));
                 }
                 if(!query.check(input)) return;
                 try {
