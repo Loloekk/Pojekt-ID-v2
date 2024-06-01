@@ -15,10 +15,10 @@ typedef vector<int> vi;
 #define sz(x)  (ll)(x).size()
 
 const int DNI_SYMULACJI = 60;
-const int PACZEK_DZIENNIE = 30;
-const int ILE_POJAZDOW_NA_MAGAZYN = 15;
-const int ILE_KIEROWCOW_NA_MAGAZYN = 10;
-const int ILE_KOMISJONEROW_NA_MAGAZYN = 4;
+const int PACZEK_DZIENNIE = 60;
+const int ILE_POJAZDOW_NA_MAGAZYN = 60;
+const int ILE_KIEROWCOW_NA_MAGAZYN = 20;
+const int ILE_KOMISJONEROW_NA_MAGAZYN = 5;
 const int ILE_INFORMATYKOW_NA_MAGAZYN = 2;
 const int ILE_KLIENTOW = 1000;
 
@@ -271,7 +271,9 @@ vector<string> przymiotnik = {
     "nieustraszliwy","waleczny","wielki","fioletowy","kwadratowy","nieprzeliczalny","the","trafny","smaczny",
     "radosny","cichy","luzacki","maly","smieszny","pomocny","pomocna","wielka","cicha","radosna","nieustraszliwa",
     "smaczna","dumna","dzielna","limonkowa","zielona","czarna","srebrny","srebrna","trafna","kwadratowa","czerwona",
-    "wilczy","przestraszony","boczny","dolny","dolna","metalowy","liniowy","liniowa",
+    "wilczy","przestraszony","boczny","dolny","dolna","metalowy","liniowy","liniowa","misiowy","obszerny","wysoki",
+    "wysoka","niski","niska","plaski","bezprzewodowy","bezprzewodowa","kablowy","kablowa","jasna","jasny","ciemny",
+    "ciemna"
 };
 vector<string> rzecz = {
     "heban","rock","trawa","herb","tarcza","kura","osa","kula","kwadrat","mysz","lis","klej","kostka","chleb",
@@ -279,7 +281,8 @@ vector<string> rzecz = {
     "smerf","banan","toster","parasol","drewno","drzewo","spray","talerz","widelec","linijka","drut","matryca",
     "kartka","karton","astronauta","problem","moneta","muzyka","papier","puszka","drzwi","sikorka","kos","orzel",
     "reszka","okno","skarpeta","lampka","kawa","herbata","yeti","stopa","metal","plastik","lustro","srebro","byk",
-    "cielak","wilk","bok","linia",
+    "cielak","wilk","bok","linia","trawa","mak","mech","rak","dudek","liliput","oryks","antylopa","papuga","klops",
+    "wiewiorka","jajko","dolar","rubel","funt","kilogram","waga","masa","kula","sfera","koszyk","stal","misiek"
 };
 vector<string> domena = {
     "gmail.com","onet.pl","o2.pl","interia.pl","wp.pl",
@@ -789,22 +792,13 @@ int main(){
         }
         dodajSekund(1*DZIEN);
     }
-    /*each(m,MAGAZYNY){
-        cerr << "magazyn:" << m.id_magazynu << endl;
-        int cnt=0;
-        each(k,kierowcy)
-            if(m.id_magazynu == kierowcaMagazyn[k])
-                ++cnt;
-        cerr << " kierowcow: " << cnt << endl;
-        
-        cnt = 0;
-        each(p,POJAZDY)
-            if(m.id_magazynu == pojazdMagazyn[p.id_pojazdu])
-                ++cnt;
-        cerr << " pojazdów: " << cnt << endl;
-        cnt = 0;
-    }*/
     cerr << endl;
+    /*int cntAll=0,cntDone=0;
+    each(o,ODBIORY){
+        ++cntAll;
+        cntDone += o.data_dostarczenia!="NULL";
+    }
+    cerr << " DOSTARCZONO: " << cntDone << "/" << cntAll << " (" <<  (100*cntDone/cntAll) << "%)" << endl; */
     printEverything();
     return 0;
 }
@@ -1303,18 +1297,18 @@ int magazyn_docelowy(const int &zlecenie){
 
 vector<pair<int,int>> wyznaczTrasy(){
     vector<pair<int,int>> trasy;
-    vector<tuple<int,int,int,string>> paczkiDoDostarczenia;// {id_zlecenia, id_nadawcy, id_odbiorcy, data_zlozenia}
+    vector<tuple<int,int,int>> paczkiDoDostarczenia;// {id_zlecenia, id_nadawcy, id_odbiorcy, data_zlozenia}
     each(z,ZLECENIA){
         if(!czyZakonczone(z.id_zlecenia))
-            paczkiDoDostarczenia.pb({z.id_zlecenia,z.id_nadawcy,z.id_odbiorcy,dataNadania(z.id_zlecenia)});
+            paczkiDoDostarczenia.pb({z.id_zlecenia,z.id_nadawcy,z.id_odbiorcy});
     }
     //Pierwszenstwo maja paczki czekajace najdluzej (czy na pewno dobrze sortujemy ?)
-    sort(all(paczkiDoDostarczenia), [](const tuple<int,int,int,string> &a, const tuple<int,int,int,string> &b){
-        return get<3>(a) > get<3>(b);
+    sort(all(paczkiDoDostarczenia), [](const tuple<int,int,int> &a, const tuple<int,int,int> &b){
+        return get<0>(a) > get<0>(b);
     });
     
     vector<bool> visStart(sz(MAGAZYNY) + 1),visKoniec(sz(MAGAZYNY) + 1);
-    for(auto &[zlecenie, id_nadawca, id_odbiorca, data] : paczkiDoDostarczenia){
+    for(auto &[zlecenie, id_nadawca, id_odbiorca] : paczkiDoDostarczenia){
         int magazynStart = paczkomatMagazyn[klientPaczkomat[id_nadawca]];
         int magazynKoniec = paczkomatMagazyn[klientPaczkomat[id_odbiorca]];
         if(magazynStart!=magazynKoniec && !visStart[magazynStart] && !visKoniec[magazynKoniec]){
@@ -1337,6 +1331,7 @@ vector<pair<int,int>> wyznaczTrasy(){
             trasy.pb({magazynStart,magazynKoniec});   
         }
     }
+
     fill(all(visStart),0);
     fill(all(visKoniec),0);
     
@@ -1350,20 +1345,7 @@ vector<pair<int,int>> wyznaczTrasy(){
             trasy.pb({magazynStart,magazynKoniec});   
         }
     }
-    fill(all(visStart),0);
-    fill(all(visKoniec),0);
-
-    rep(proba,0,100){        
-        int magazynStart = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
-        int magazynKoniec = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
-        if(magazynStart == magazynKoniec) continue;
-        trasy.pb({magazynStart,magazynKoniec});   
-        if(!visStart[magazynStart] || !visKoniec[magazynKoniec]){
-            visStart[magazynStart] = 1;
-            visKoniec[magazynKoniec] = 1;
-            trasy.pb({magazynStart,magazynKoniec});   
-        }
-    }
+    
     
     rep(proba,0,100){        
         int magazynStart = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
