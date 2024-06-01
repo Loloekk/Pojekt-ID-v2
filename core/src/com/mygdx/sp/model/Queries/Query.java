@@ -1,4 +1,4 @@
-package com.mygdx.sp.model;
+package com.mygdx.sp.model.Queries;
 
 
 import java.util.List;

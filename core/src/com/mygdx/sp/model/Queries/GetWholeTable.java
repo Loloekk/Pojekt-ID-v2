@@ -1,7 +1,5 @@
 package com.mygdx.sp.model.Queries;
 
-import com.mygdx.sp.model.Query;
-
 import java.util.List;
 
 public class GetWholeTable implements Query {

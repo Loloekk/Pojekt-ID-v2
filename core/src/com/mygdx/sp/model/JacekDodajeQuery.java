@@ -1,6 +1,7 @@
 package com.mygdx.sp.model;
 
 import com.mygdx.sp.model.Queries.GetWholeTable;
+import com.mygdx.sp.model.Queries.Query;
 
 import java.util.ArrayList;
 import java.util.List;

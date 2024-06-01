@@ -2,7 +2,7 @@ package com.mygdx.sp.model.Queries;
 
 import java.util.List;
 
-public class CopyPasteQuery implements com.mygdx.sp.model.Query {
+public class CopyPasteQuery implements Query {
     @Override
     public String getQuery(List<String> args) {
         if(!check(args))return null;
