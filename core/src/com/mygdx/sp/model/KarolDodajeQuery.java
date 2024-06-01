@@ -13,7 +13,7 @@ public class KarolDodajeQuery {
         List<Query> list = new ArrayList<>();
         list.add(new GetWholeTable());
         list.add(new CopyPasteQuery());
-        /////TODO Tu dodajemy kolejne zapytania dla przykładu są trzy identyczne
+        /////TODO Tu dodajemy kolejne zapytania
         return list;
     }
 }
