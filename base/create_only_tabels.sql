@@ -109,7 +109,7 @@ CREATE TABLE praca_osoby(
     id_stanowiska INT NOT NULL REFERENCES stanowiska(id_stanowiska),
     data_rozpoczecia TIMESTAMP NOT NULL,
     data_zakonczenia TIMESTAMP CHECK(data_rozpoczecia<data_zakonczenia),
-    CONSTRAINT pk_praca_osoby PRIMARY KEY (id_osoby,id_magazynu,id_stanowiska,data_rozpoczecia)
+    CONSTRAINT pk_praca_osoby PRIMARY KEY (id_osoby,data_rozpoczecia)
 );
 
 CREATE TABLE paczkomaty(
@@ -150,7 +150,7 @@ CREATE TABLE zlecenia_magazyny(
     id_zlecenia NUMERIC(12,0) NOT NULL REFERENCES zlecenia(id_zlecenia),
     id_magazynu INT NOT NULL REFERENCES magazyny(id_magazynu),
     "data_rozpakowania" TIMESTAMP NOT NULL,
-    CONSTRAINT pk_zlecenia_magazyny PRIMARY KEY (id_zlecenia,id_magazynu)
+    CONSTRAINT pk_zlecenia_magazyny PRIMARY KEY (id_zlecenia,id_magazynu,data_rozpakowania)
 );
 
 CREATE TABLE kursy_paczkomaty(
@@ -173,7 +173,9 @@ CREATE TABLE odbiory(
     id_skrytki NUMERIC(12,0) NOT NULL REFERENCES skrytki(id_skrytki),
     data_dostarczenia TIMESTAMP,
     data_odebrania TIMESTAMP,
-    CONSTRAINT pk_odbiory PRIMARY KEY (id_zlecenia)
+    CONSTRAINT pk_odbiory PRIMARY KEY (id_zlecenia),
+    CONSTRAINT daty_mni CHECK(data_dostarczenia<data_odebrania),
+    CONSTRAINT daty_null CHECK(data_odebrania IS NULL OR data_dostarczenia IS NOT NULL)
 );
 
 CREATE TABLE nadania(
