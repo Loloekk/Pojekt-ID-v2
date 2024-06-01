@@ -1,6 +1,8 @@
 package com.mygdx.sp.model.Queries;
 
 
+import com.mygdx.sp.model.TurboString;
+
 import java.util.List;
 
 public interface Query {

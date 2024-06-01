@@ -1,4 +1,4 @@
-package com.mygdx.sp.model.Queries;
+package com.mygdx.sp.model;
 
 public class TurboString {
     private String value;
