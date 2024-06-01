@@ -12,19 +12,28 @@ typedef vector<int> vi;
 #define rep(i,b,e) for(int i=(b); i<(e); i++)
 #define each(a,x)  for(auto &a : (x))
 #define all(x) (x).begin(), (x).end()
-#define sz(x)  (int)(x).size()
+#define sz(x)  (ll)(x).size()
 
-const int DNI_SYMULACJI = 30;
-const int PACZEK_DZIENNIE = 15;
-const int ILE_POJAZDOW_BEZ_KIEROWCY = 15;
-const int ILE_PAR_POJAZD_KIEROWCA = 30;
-const int ILE_INFORMATYKOW = 5;
-const int ILE_KLIENTOW = 200;
+const int DNI_SYMULACJI = 60;
+const int PACZEK_DZIENNIE = 30;
+const int ILE_POJAZDOW_NA_MAGAZYN = 15;
+const int ILE_KIEROWCOW_NA_MAGAZYN = 10;
+const int ILE_KOMISJONEROW_NA_MAGAZYN = 4;
+const int ILE_INFORMATYKOW_NA_MAGAZYN = 2;
+const int ILE_KLIENTOW = 1000;
 
 const int SEKUNDA = 1;
 const int MINUTA = 60;
 const int GODZINA = MINUTA*60;
 const int DZIEN = GODZINA*24;
+
+auto rd = std::random_device {}; 
+auto random_eng = std::default_random_engine { rd() };
+
+template <class T>
+void mieszaj(vector<T> &v){
+    shuffle(v.begin(),v.end(),random_eng);
+}
 
 auto T = time(0);
 auto TM = *localtime(&T);
@@ -55,8 +64,9 @@ map<int,string> magazynLokalizacja;
 map<string,int> miastoMagazyn;
 map<int,int> nadmagazyn;
 map<int,int> komisjonerMagazyn;
+map<int,int> informatykMagazyn;
 map<int,int> klientPaczkomat;
-map<int,int> kierowcaPojazd;
+map<int,int> pojazdMagazyn; // aktualne polozenie pojazdu
 map<int,int> kierowcaMagazyn; // aktualne polozenie kierowcy
 map<int,set<int>> pojazdZlecenia; // aktualne zlecenia w pojezdzie 
 map<int,set<int>> paczkomatZlecenia; // oczekujace paczki do zabrania przez kierowcow w paczkomacie
@@ -64,14 +74,15 @@ map<int,set<int>> magazynZlecenia; // aktualne paczki w magazynie
 map<int,int> paczkomatMagazyn;
 
 // Na ten moment zakladamy ze w danym miescie jest maksymalnie jeden magazyn
-void dodajMagazyn(string miasto, string nadmiasto);
-void dodajPaczkomat(string miasto, int ilosc);
-void dodajPaczkomat(string miasto);
-int wolnaSkrytka(int paczkomat, int rozmiar);
-int wolneMiejsce(int pojazd);
-int paczkaRozmiar(int zlecenie);
-int paczkaDocelowyMagazyn(int zlecenie);
-int potrzebneUprawnienie(int pojazd_rodzaj);
+void dodajMagazyn(const string &miasto, const string &nadmiasto);
+void dodajPaczkomat(const string &miasto, const int &ilosc);
+void dodajPaczkomat(const string &miasto);
+int wolnaSkrytka(const int &paczkomat, const int &rozmiar);
+int wolneMiejsce(const int &pojazd);
+int paczkaRozmiar(const int &zlecenie);
+int potrzebneUprawnienie(const int &pojazd_rodzaj);
+int magazyn_startowy(const int &zlecenie);
+int magazyn_docelowy(const int &zlecenie);
 // Krotki w tabelach;
 // Dla int'ów -1 oznacza zazwyczaj wartość NULL 
 struct osoba{
@@ -231,7 +242,6 @@ int NEXT_MAGAZYN_ID=1;
 int NEXT_PACZKOMAT_ID=1;
 int NEXT_SKRYTKA_ID=1;
 int NEXT_ZLECENIE_ID=1;
-int NEXT_NADANIE_ID=1;
 
 mt19937 mt(123);
 int rnd(int a, int b){
@@ -313,11 +323,19 @@ string to_string(const skrytka&);
 
 osoba genOsoba();
 pojazd genPojazd();
-string genLokalizacja(string miasto);
-bool czyKobieta(osoba);
+string genLokalizacja(const string &miasto);
+bool czyKobieta(const osoba &os);
 vector<string> tokenize(string, char);
 void printEverything();
-void odbierzPaczke(int zlecenie, string data_dostarczenia, string data_odbioru);
+void odbierzPaczke(const int &zlecenie, const string &data_dostarczenia, const string &data_odbioru);
+pair<pojazd,osoba> dajPojazdKierowca(const int &magazynId);
+bool mozeProwadzic(const int &osobaId, const int &pojazdId);
+int rodzajPojazdu(const int &pojazdId);
+osoba idToOsoba(const int &osobaId);
+pojazd idToPojazd(const int &pojazdId);
+vector<pair<int,int>> wyznaczTrasy(); // Zwraca zbiór par {A,B} takich, że pasuje wykonać kurs z magazynu A do magazynu B
+string dataNadania(const int &zlecenie);
+
 
 vector<osoba> OSOBY;
 vector<stanowisko_osoba> STANOWISKA_OSOBY;
@@ -364,7 +382,7 @@ vector<int> komisjonerzy; // {osobaId,magazynId}; pracuja kazdy w swoim magazyni
 vector<int> informatycy; // {osobaId}; pracuja losowym magazynie od rana do wieczora 
 vector<int> klienci; // {osobaId,paczkomatId}; nadaje paczki ze swojego paczkomatu 
 vector<int> dyrektorzy; // {osobaId}; "pracuje" w losowym magazynie
-vector<int> kierowcy; // {osobaId}; jezdza w losowe miejsca 
+vector<int> kierowcy; // {osobaId}; jezdza w losowe miejsca
 
 int main(){
     ios_base::sync_with_stdio(0);
@@ -375,28 +393,31 @@ int main(){
 
     // Magazyny
     dodajMagazyn("Warszawa","-");
-    dodajMagazyn("Kraków","-");
-    dodajMagazyn("Poznań","-");
+    dodajMagazyn("Krakow","-");
+    dodajMagazyn("Poznan","-");
     dodajMagazyn("Piaseczno","Warszawa");
     dodajMagazyn("Radom","Warszawa");
     dodajMagazyn("Siedlce","Warszawa");
-    dodajMagazyn("Tarnów","Kraków");
-    dodajMagazyn("Katowice","Kraków");
-    dodajMagazyn("Gniezno","Poznań");
-    dodajMagazyn("Piła","Poznań");
-    dodajMagazyn("Leszno","Poznań");
+    dodajMagazyn("Tarnow","Krakow");
+    dodajMagazyn("Katowice","Krakow");
+    dodajMagazyn("Gniezno","Poznan");
+    dodajMagazyn("Pila","Poznań");
+    dodajMagazyn("Leszno","Poznan");
+    dodajMagazyn("Nowy Sacz","Krakow");
     // Paczkomaty
     dodajPaczkomat("Warszawa",4);
-    dodajPaczkomat("Kraków",4);
-    dodajPaczkomat("Poznań",3);
+    dodajPaczkomat("Krakow",4);
+    dodajPaczkomat("Poznan",3);
     dodajPaczkomat("Radom",2);
     dodajPaczkomat("Siedlce",2);
     dodajPaczkomat("Piaseczno",2);
-    dodajPaczkomat("Tarnów",2);
+    dodajPaczkomat("Tarnow",2);
     dodajPaczkomat("Katowice",2);
+    dodajPaczkomat("Nowy Sacz");
     dodajPaczkomat("Gniezno");
-    dodajPaczkomat("Piła");
+    dodajPaczkomat("Pila");
     dodajPaczkomat("Leszno");
+    assert(MAGAZYNY.size()%2==0 && "Ilosc paczkomatow ma byc parzysta (na potrzeby generowania danych)");
 
     // Rodzaje przegladow
     
@@ -408,30 +429,6 @@ int main(){
         }
     }
     // Rodzaje pojazdow
-    
-    // Pojazdy (bez kierowcy)
-    {
-        vector<bool> visMagazyn(MAGAZYNY.size()+1);
-        rep(i,0,ILE_POJAZDOW_BEZ_KIEROWCY){
-            pojazd p = genPojazd();
-            int obecnyMagazyn=0;
-            for(int tries=0; tries<3; ++tries){// 3 proby, aby pojazdy były równomierniej rozłożone po magazynach 
-                obecnyMagazyn = rnd(1,MAGAZYNY.size());
-                if(!visMagazyn[obecnyMagazyn])
-                    break;
-            }
-            visMagazyn[obecnyMagazyn] = 1;
-            POJAZDY.pb(p);
-            /// kurs pojazdu "p" z "obecny_magazyn" do "obecny_magazyn", aby zaznaczyc mu pozycje startowa
-            KURSY.pb({NEXT_KURS_ID++, p.id_pojazdu, NN.id, obecnyMagazyn, obecnyMagazyn, obecna_data(), obecna_data()}); 
-            // Wirtualnie serwisujemy nowo otrzymany pojazd (świeżo z fabryki)
-            for(auto &[id_rodzaju,id_przegladu,czestotliwosc] : PRZEGLADY_ROD_POJAZDY){
-                if(id_rodzaju == p.id_rodzaju){
-                    SERWIS.pb({p.id_pojazdu, id_przegladu, obecna_data(-24*GODZINA), obecna_data(-24*GODZINA+MINUTA)});
-                }
-            }
-        }
-    }
 
     // Stanowiska
     // Uprawnienia
@@ -443,7 +440,7 @@ int main(){
         klienci.pb(klient.id);
         klientPaczkomat[klient.id] = paczkomatId;
     }
-    /// Dyrektor: 1
+    /// Dyrektor
     {
         osoba dyr = genOsoba();
         OSOBY.pb(dyr);
@@ -451,81 +448,99 @@ int main(){
         dyrektorzy.pb(dyr.id);
     }
 
-    /// Kierowcy&Pojazdy: 30
-    {
-        vector<bool> visMagazyn(MAGAZYNY.size()+1);
-        rep(i,0,30){
+    // Kierowcy
+    each(m,MAGAZYNY){
+        int magId = m.id_magazynu;
+        int ile = ILE_KIEROWCOW_NA_MAGAZYN + rnd(0,1);
+        rep(k,0,ile){
             osoba kier = genOsoba();
-            pojazd p = genPojazd();
-            int magId = 1;
-            for(int j=0; j<3; ++j){
-                magId = rnd(1,MAGAZYNY.size());
-                if(!visMagazyn[magId]) break;
-            }
-            int upr = potrzebneUprawnienie(p.id_rodzaju);
             OSOBY.pb(kier);
             STANOWISKA_OSOBY.pb({kier.id,2});
-            OSOBY_UPRAWNIENIA.pb({kier.id,upr});
-            POJAZDY.pb(p);
-            /// kurs pojazdu "p" z "magId" do "magId", aby zaznaczyc mu pozycje startowa
-            KURSY.pb({NEXT_KURS_ID++, p.id_pojazdu, kier.id, magId, magId, obecna_data(), obecna_data()});
-            if(rnd(1,3)==1){// Osoba ma jeszcze inne uprawnienie
-                int upr2 = rnd(1,UPRAWNIENIA.size());
-                if(upr!=upr2){ 
-                    OSOBY_UPRAWNIENIA.pb({kier.id,upr2});
-                }
-            }
-            kierowcy.pb(kier.id);
             kierowcaMagazyn[kier.id] = magId;
-            kierowcaPojazd[kier.id] = p.id_pojazdu;
+            kierowcy.pb(kier.id);
+            int ile_prob = rnd(2,4);
+            vector<bool> upr(sz(UPRAWNIENIA)+1);
+            rep(i,0,ile_prob){
+                upr[rnd(1,sz(UPRAWNIENIA))] = 1;
+            }
+            for(int u=1; u<=sz(UPRAWNIENIA); ++u){
+                if(upr[u]){
+                    OSOBY_UPRAWNIENIA.pb({kier.id,u});
+                }
+            }            
+        }
+    }
+
+    /// Pojazdy
+    each(m,MAGAZYNY){
+        int magId = m.id_magazynu;
+        int ile = ILE_POJAZDOW_NA_MAGAZYN + rnd(0,2);
+        rep(p,0,ile){
+            pojazd poj = genPojazd();
+            POJAZDY.pb(poj);
+            /// kurs pojazdu "p" z "magId" do "magId", aby zaznaczyc mu pozycje startowa
+            KURSY.pb({NEXT_KURS_ID++, poj.id_pojazdu, NN.id, magId, magId, obecna_data(), obecna_data()});            
+            pojazdMagazyn[poj.id_pojazdu] = magId;
             // Wirtualnie serwisujemy nowo otrzymany pojazd (świeżo z fabryki)
             for(auto &[id_rodzaju,id_przegladu,czestotliwosc] : PRZEGLADY_ROD_POJAZDY){
-                if(id_rodzaju == p.id_rodzaju){
-                    SERWIS.pb({p.id_pojazdu, id_przegladu, obecna_data(-24*GODZINA), obecna_data(-24*GODZINA+MINUTA)});
+                if(id_rodzaju == poj.id_rodzaju){
+                    SERWIS.pb({poj.id_pojazdu, id_przegladu, obecna_data(-24*GODZINA), obecna_data(-24*GODZINA+MINUTA)});
                 }
             }
         }
     }
-    /// Komisjonerów: #magazynow
-    for(int i=0; i<MAGAZYNY.size(); ++i){
-        osoba kom = genOsoba();
-        int magId = MAGAZYNY[i].id_magazynu;
-        OSOBY.pb(kom);
-        STANOWISKA_OSOBY.pb({kom.id,3});
-        komisjonerzy.pb(kom.id);
-        komisjonerMagazyn[kom.id] = magId;
+    /// Komisjonerzy
+    each(m,MAGAZYNY){
+        int magId = m.id_magazynu;
+        int ile = ILE_KOMISJONEROW_NA_MAGAZYN + rnd(0,2);
+        rep(k,0,ile){
+            osoba kom = genOsoba();
+            OSOBY.pb(kom);
+            STANOWISKA_OSOBY.pb({kom.id,3});
+            komisjonerzy.pb(kom.id);
+            komisjonerMagazyn[kom.id] = magId;
+        }
     }
     // Informatyków
-    rep(i,0,ILE_INFORMATYKOW){
-        osoba inf = genOsoba();
-        int magId = rnd(1,MAGAZYNY.size());
-        OSOBY.pb(inf);
-        STANOWISKA_OSOBY.pb({inf.id,4});
-        informatycy.pb(inf.id);
+    each(m,MAGAZYNY){
+        int magId = m.id_magazynu;
+        int ile = ILE_INFORMATYKOW_NA_MAGAZYN + rnd(0,1);
+        rep(k,0,ile){
+            osoba inf = genOsoba();
+            OSOBY.pb(inf);
+            STANOWISKA_OSOBY.pb({inf.id,4});
+            informatycy.pb(inf.id);
+            informatykMagazyn[inf.id] = magId;
+        }
     }
     for(int d=0; d<DNI_SYMULACJI; ++d){
-        int czasDzien = 0;
+        cerr << '.' << flush;
+        // cerr << "GENEROWANIE DNIA " << d << "." << endl;
+        ll czasDzien = 0;
         // godzina 0:00:00
         czasDzien = 7*GODZINA;
         // godzina 7:00:00
         // Komisjonerzy i dyrektor zaczynaja prace i pracuja 12 godzin
         for(auto komId : komisjonerzy){
             int magId = komisjonerMagazyn[komId];
-            string dataRozpoczecia = obecna_data(czasDzien + rnd(0,10*MINUTA));
-            string dataZakonczenia = obecna_data(czasDzien + 12*GODZINA - rnd(0,10*MINUTA));
+            if(rnd(1,20) == 1) continue; // 5% szans, że nie przyjdzie do pracy
+            string dataRozpoczecia = obecna_data(czasDzien + rnd(-10*MINUTA,10*MINUTA));
+            string dataZakonczenia = obecna_data(czasDzien + 12*GODZINA + rnd(-5*MINUTA,10*MINUTA));
             PRACA_OSOBY.pb({komId, magId, 3, dataRozpoczecia, dataZakonczenia });
         }
         for(auto dyrId : dyrektorzy){
             int magId = rnd(1,MAGAZYNY.size());
-            string dataRozpoczecia = obecna_data(czasDzien + rnd(0,10*MINUTA));
-            string dataZakonczenia = obecna_data(czasDzien + 12*GODZINA - rnd(0,10*MINUTA));
+            if(rnd(1,50) == 1) continue; // 2% szans, że nie przyjdzie do pracy
+            string dataRozpoczecia = obecna_data(czasDzien + rnd(-10*MINUTA,10*MINUTA));
+            string dataZakonczenia = obecna_data(czasDzien + 12*GODZINA + rnd(2*MINUTA,10*MINUTA));
             PRACA_OSOBY.pb({dyrId, magId, 1, dataRozpoczecia, dataZakonczenia});
         }
         // Informatycy zaczynaja prace od 10 (+/- 2h) do 18 (+/- 2h)
         for(auto infId : informatycy){
-            int magId = rnd(1,MAGAZYNY.size());
-            string dataRozpoczecia = obecna_data(8*GODZINA + rnd(0,4*GODZINA));
-            string dataZakonczenia = obecna_data(16*GODZINA + rnd(0,4*GODZINA));
+            int magId = informatykMagazyn[infId];
+            if(rnd(1,20) == 1) continue; // 5% szans, że nie przyjdzie do pracy 
+            string dataRozpoczecia = obecna_data(10*GODZINA + rnd(-2*GODZINA,2*GODZINA));
+            string dataZakonczenia = obecna_data(18*GODZINA + rnd(-2*GODZINA,2*GODZINA));
             PRACA_OSOBY.pb({infId, magId, 4, dataRozpoczecia, dataZakonczenia});
         }
 
@@ -534,19 +549,34 @@ int main(){
         
         // Ludzie nadaja paczki
         for(int i=0; i<PACZEK_DZIENNIE; ++i){
-            string dataNadania = obecna_data(czasDzien + (i*1*GODZINA)/(PACZEK_DZIENNIE) + rnd(0,3*SEKUNDA));
-
+            ll czasNadania = czasDzien + (i*1*GODZINA)/(PACZEK_DZIENNIE) + rnd(0,3*SEKUNDA);
+            string dataNadania = obecna_data(czasNadania);
             int nadawcaId = klienci[rnd(0,klienci.size()-1)];
             int adresatId = klienci[rnd(0,klienci.size()-1)];
             if(nadawcaId==adresatId) continue;
             int paczkomatNadawcy = klientPaczkomat[nadawcaId];
             int paczkomatOdbiorcy = klientPaczkomat[adresatId];
-            if(paczkomatNadawcy == paczkomatOdbiorcy) continue;
+            
             int rozmiar = rnd(1,3);
-            int skrytkaNadawcyId = wolnaSkrytka(paczkomatNadawcy,rozmiar);
-            int skrytkaOdbiorcyId = wolnaSkrytka(paczkomatOdbiorcy,rozmiar);
-            if(skrytkaNadawcyId == -1) continue;  
-            if(skrytkaOdbiorcyId == -1) continue;  
+            int skrytkaNadawcyId,skrytkaOdbiorcyId;
+            if(paczkomatNadawcy == paczkomatOdbiorcy){
+                // Paczka lokalna, generatorka się nią nie zajmuje - od razu wpisujemy że ktoś ją odebrał
+                skrytkaNadawcyId = skrytkaOdbiorcyId = wolnaSkrytka(paczkomatNadawcy,rozmiar);
+                if(skrytkaNadawcyId == -1) continue; // Brak miejsca w paczkomacie
+                int zlecenieId = NEXT_ZLECENIE_ID++;
+                ZLECENIA.pb({zlecenieId, nadawcaId, adresatId, paczkomatOdbiorcy, dataNadania, rozmiar});
+
+                ll czasOdbioru = czasNadania + rnd(5*MINUTA,3*GODZINA);
+                string dataOdbioru = obecna_data(czasOdbioru);
+                ODBIORY.pb({zlecenieId, skrytkaOdbiorcyId, dataNadania, dataOdbioru});
+                // rejestrujemy nadanie
+                NADANIA.pb({zlecenieId,skrytkaNadawcyId,dataNadania});
+                continue;
+            }
+            skrytkaNadawcyId = wolnaSkrytka(paczkomatNadawcy,rozmiar);
+            skrytkaOdbiorcyId = wolnaSkrytka(paczkomatOdbiorcy,rozmiar);
+            
+            if(skrytkaNadawcyId == -1 || skrytkaOdbiorcyId == -1) continue;  
 
             // tworzymy zlecenie
             int zlecenieId = NEXT_ZLECENIE_ID++;
@@ -570,27 +600,34 @@ int main(){
         // godzina 10:00:00 - 11:00:00
         // Kierowcy zbieraja paczki z paczkomatow nalezacych do okolicznego magazynu
         {
-            vector<bool> magazynWyzbierane(MAGAZYNY.size()+1);
-            for(auto kierId : kierowcy){
-                int magId = kierowcaMagazyn[kierId];
-                int pojazdId = kierowcaPojazd[kierId]; 
-                if(magazynWyzbierane[magId]) continue;
-                magazynWyzbierane[magId] = 1;
+            each(m,MAGAZYNY){
+                int magId = m.id_magazynu;
+                osoba kier;
+                pojazd poj;
+                try{
+                    tie(poj,kier) = dajPojazdKierowca(magId);
+                }catch(...){
+                    continue; // Nie skompletujemy kierowcy i pojazdu :(
+                }
+                int kierowcaId = kier.id;
+                int pojazdId = poj.id_pojazdu;
+
                 vector<int> paczkomatyDoWyzbierania;
                 for(auto &[id_p2,lok2,magId2] : PACZKOMATY){
-                    if(magId2 == magId){
+                    if(magId2 == magId && !paczkomatZlecenia[id_p2].empty()){
                         paczkomatyDoWyzbierania.pb(id_p2);
                     }
                 }
+                if(paczkomatyDoWyzbierania.empty()) continue; // Nic nie ma w paczkomatach ;(
                 int idKursu = NEXT_KURS_ID++; // Kurs od magazynu do siebie samego - wyzbieranie paczek
-                int czasStart = czasDzien+rnd(1*MINUTA,5*MINUTA);
-                int czasKoniec = czasDzien+rnd(40*MINUTA,45*MINUTA);
+                ll czasStart = czasDzien+rnd(1*MINUTA,5*MINUTA);
+                ll czasKoniec = czasDzien+rnd(40*MINUTA,45*MINUTA);
                 string dataStart = obecna_data(czasStart);
                 string dataKoniec = obecna_data(czasKoniec);
-                for(int i=0; i<paczkomatyDoWyzbierania.size(); ++i){
-                    auto &id_p = paczkomatyDoWyzbierania[i];
-                    int czasP = czasKoniec*(i)+czasStart*(int(paczkomatyDoWyzbierania.size())-i);
-                    int czasP2 = czasKoniec*(i+1)+czasStart*(int(paczkomatyDoWyzbierania.size())-i-1);
+                for(int i=0; i<sz(paczkomatyDoWyzbierania); ++i){
+                    const auto &id_p = paczkomatyDoWyzbierania[i];
+                    ll czasP = (czasKoniec*(i)+czasStart*(sz(paczkomatyDoWyzbierania)-i)) / (sz(paczkomatyDoWyzbierania)+1);
+                    ll czasP2 = (czasKoniec*(i+1)+czasStart*(sz(paczkomatyDoWyzbierania)-i-1)) / (sz(paczkomatyDoWyzbierania)+1);
                     string dataP = obecna_data(czasP);
                     string dataO = obecna_data(czasP2);
                     // Ładujemy paczki z paczkomatu do pojazdu
@@ -601,19 +638,20 @@ int main(){
                             pojazdZlecenia[pojazdId].insert(zlecenie);
                             ZLECENIA_KURSY.pb({zlecenie, idKursu, dataP});
                             it = paczkomatZlecenia[id_p].erase(it);
+                            // cerr << " paczucha1\n"; 
                         }else{
                             ++it;
                         }
                     }
                     KURSY_PACZKOMATY.pb({idKursu,id_p,dataP,dataO});
                 }
-                KURSY.pb({idKursu, pojazdId, kierId, magId, magId, dataStart, dataKoniec});
+                KURSY.pb({idKursu, pojazdId, kierowcaId, magId, magId, dataStart, dataKoniec});
                 // Wyładowujemy paczki do magazynu
-                int czasStartWyladowania = czasKoniec + rnd(1*MINUTA, 3*MINUTA);
-                int czasKoniecWyladowania = czasStartWyladowania + rnd(10*MINUTA,15*MINUTA);
+                ll czasStartWyladowania = czasKoniec + rnd(1*MINUTA, 3*MINUTA);
+                ll czasKoniecWyladowania = czasStartWyladowania + rnd(10*MINUTA,15*MINUTA);
                 for(auto it=pojazdZlecenia[pojazdId].begin(); it!=pojazdZlecenia[pojazdId].end();){
                     int zlecenie = *it;
-                    int czasWyladowania = rnd(czasStartWyladowania+0.5*MINUTA, czasKoniecWyladowania-0.5*MINUTA);
+                    ll czasWyladowania = rnd(czasStartWyladowania+0.5*MINUTA, czasKoniecWyladowania-0.5*MINUTA);
                     string dataWyladowania = obecna_data(czasWyladowania);
                     magazynZlecenia[magId].insert(zlecenie);
                     ZLECENIA_MAGAZYNY.pb({zlecenie,magId,dataWyladowania});
@@ -625,80 +663,99 @@ int main(){
         }
         czasDzien = 11.5*GODZINA;
         // Godzina 11:30:00 - 16:30:00
-        // Dla kazdego kierowcy w magazynie A losujemy magazyn B, do ktorego zawozi on odpowiednie paczki z magazynu A
-        for(auto kierId : kierowcy){
-            int magA = kierowcaMagazyn[kierId];
-            int pojazdId = kierowcaPojazd[kierId]; 
-            int magB=magA;
-            while(magA == magB){
-                magB = rnd(1,MAGAZYNY.size());
+        // Rozwożenie paczek między magazynami
+        const auto trasy = wyznaczTrasy();
+        // cerr << "Trasy:" << sz(trasy) << endl;
+        for(const auto &[magazynStart, magazynKoniec] : trasy){
+            pojazd poj;
+            osoba kier;
+            try{
+                tie(poj,kier) = dajPojazdKierowca(magazynStart);
+            }catch(...){
+                continue; // Nie skompletujemy kierowcy i pojazdu :(
             }
-            int czasStartZaladunek = czasDzien + rnd(5*MINUTA,10*MINUTA);
-            int czasKoniecZaladunek = czasStartZaladunek + rnd(5*MINUTA,15*MINUTA);
+            ll czasStartZaladunek = czasDzien + rnd(5*MINUTA,10*MINUTA);
+            ll czasKoniecZaladunek = czasStartZaladunek + rnd(5*MINUTA,15*MINUTA);
             int kursId = NEXT_KURS_ID++;
-            // Ladujemy pojazd paczkami
-            for(auto it=magazynZlecenia[magA].begin(); it!=magazynZlecenia[magA].end();){
+            int kierId = kier.id;
+            int pojazdId = poj.id_pojazdu;
+            // Ładujemy pojazd paczkami
+            for(auto it=magazynZlecenia[magazynStart].begin(); it!=magazynZlecenia[magazynStart].end();){
                 int zlecenie = *it;
-                if(paczkaDocelowyMagazyn(zlecenie)==magB && wolneMiejsce(pojazdId)>=(1<<paczkaRozmiar(zlecenie))){
+                if(magazyn_docelowy(zlecenie)==magazynKoniec && wolneMiejsce(pojazdId)>=(1<<paczkaRozmiar(zlecenie))){
                     pojazdZlecenia[pojazdId].insert(zlecenie);
-                    int czasZaladunek = rnd(czasStartZaladunek,czasKoniecZaladunek);
+                    ll czasZaladunek = rnd(czasStartZaladunek,czasKoniecZaladunek);
                     string dataZaladunek = obecna_data(czasZaladunek);
                     ZLECENIA_KURSY.pb({zlecenie,kursId,dataZaladunek});
-                    it = magazynZlecenia[magA].erase(it);
+                    it = magazynZlecenia[magazynStart].erase(it);
+                    // cerr << " paczucha2\n"; 
                 }else{
                     ++it;
                 }
             }
-            // Wysylamy w podroz do magazynu B 
-            int czasStart = czasKoniecZaladunek + rnd(3*MINUTA,5*MINUTA);
-            int czasKoniec = czasStart + rnd(3.5*GODZINA,4*GODZINA);
+        // Wysyłamy pojazd w podróż do magazynKoniec
+            ll czasStart = czasKoniecZaladunek + rnd(3*MINUTA,5*MINUTA);
+            ll czasKoniec = czasStart + rnd(3.5*GODZINA,4*GODZINA);
             string dataStart = obecna_data(czasStart);
             string dataKoniec = obecna_data(czasKoniec);
-            KURSY.pb({kursId,pojazdId,kierId,magA,magB,dataStart,dataKoniec});
-            kierowcaMagazyn[kierId] = magB;
-            // Rozładowujemy pojazd w magazynie B
-            int czasStartRozladunek = czasKoniec + rnd(3*MINUTA,7*MINUTA);
-            int czasKoniecRozladunek = czasStartRozladunek + rnd(10*MINUTA,15*MINUTA);
+            KURSY.pb({kursId,pojazdId,kierId,magazynStart,magazynKoniec,dataStart,dataKoniec});
+            kierowcaMagazyn[kierId] = magazynKoniec;
+            pojazdMagazyn[pojazdId] = magazynKoniec;
+            // Rozładowujemy pojazd w magazynKoniec
+            ll czasStartRozladunek = czasKoniec + rnd(3*MINUTA,7*MINUTA);
+            ll czasKoniecRozladunek = czasStartRozladunek + rnd(10*MINUTA,15*MINUTA);
             for(auto it=pojazdZlecenia[pojazdId].begin(); it!=pojazdZlecenia[pojazdId].end();){
                 int zlecenie = *it;
-                int czasRozladunek = rnd(czasStartRozladunek, czasKoniecRozladunek);
+                ll czasRozladunek = rnd(czasStartRozladunek, czasKoniecRozladunek);
                 string dataRozladunek = obecna_data(czasRozladunek);
-                ZLECENIA_MAGAZYNY.pb({zlecenie,magB,dataRozladunek});
-                magazynZlecenia[zlecenie].insert(zlecenie);
+                ZLECENIA_MAGAZYNY.pb({zlecenie,magazynKoniec,dataRozladunek});
+                magazynZlecenia[magazynKoniec].insert(zlecenie);
                 it = pojazdZlecenia[pojazdId].erase(it);
             }
             string dataKoniecRozladunek = obecna_data(czasKoniecRozladunek);
             DEKLARACJA_WYPAKOWAN.pb({kursId,dataKoniecRozladunek});
         }
+        
         czasDzien = 17*GODZINA;
         // godzina: 17:00:00 - 18:00:00 
         // Rozwozenie paczek z magazynow do lokalnych paczkomatow
+        
         {
-            vector<bool> magazynRozdane(MAGAZYNY.size()+1);
-            for(auto kierId : kierowcy){
-                int magId = kierowcaMagazyn[kierId];
-                int pojazdId = kierowcaPojazd[kierId]; 
-                if(magazynRozdane[magId]) continue; // paczki z danego magazynu rozwozi tylko jeden kierowca
-                magazynRozdane[magId] = 1;
+            vector<bool> visKierowca(sz(OSOBY)+1),visPojazd(sz(POJAZDY)+1);
+            each(m,MAGAZYNY){
+                int magId = m.id_magazynu;
+                pojazd poj;
+                osoba kier;
+                try{
+                    tie(poj,kier) = dajPojazdKierowca(magId);
+                }catch(...){
+                    continue; // Nie skompletujemy kierowcy i pojazdu :(
+                }
+                if(visKierowca[kier.id] || visPojazd[poj.id_pojazdu]) continue; // Kierowca / pojazd odbywa teraz jakis kurs
+                visKierowca[kier.id] = 1;
+                visPojazd[poj.id_pojazdu] = 1;
                 // Ladowanie paczek z magazynu do pojazdu
                 int kursId = NEXT_KURS_ID++;
-                int czasStartZaladunek = czasDzien + rnd(0*MINUTA,5*MINUTA);
-                int czasKoniecZaladunek = czasStartZaladunek + rnd(6*MINUTA,10*MINUTA);
+                int pojazdId = poj.id_pojazdu;
+                int kierId = kier.id;
+                ll czasStartZaladunek = czasDzien + rnd(0*MINUTA,5*MINUTA);
+                ll czasKoniecZaladunek = czasStartZaladunek + rnd(6*MINUTA,10*MINUTA);
                 for(auto it=magazynZlecenia[magId].begin(); it!=magazynZlecenia[magId].end();){
                     int zlecenie = *it;
-                    if(paczkaDocelowyMagazyn(zlecenie)==magId && wolneMiejsce(pojazdId)>=(1<<paczkaRozmiar(zlecenie))){
+                    if(magazyn_docelowy(zlecenie)==magId && wolneMiejsce(pojazdId)>=(1<<paczkaRozmiar(zlecenie))){
                         pojazdZlecenia[pojazdId].insert(zlecenie);
-                        int czasZaladunek = rnd(czasStartZaladunek,czasKoniecZaladunek);
+                        ll czasZaladunek = rnd(czasStartZaladunek,czasKoniecZaladunek);
                         string dataZaladunek = obecna_data(czasZaladunek);
                         ZLECENIA_KURSY.pb({zlecenie,kursId,dataZaladunek});
                         it = magazynZlecenia[magId].erase(it);
+                        // cerr << " paczucha3\n"; 
                     }else{
                         ++it;
                     }
                 }
                 // Rozwozenie paczek po paczkomatach wokolo
-                int czasStart = czasKoniecZaladunek + rnd(3*MINUTA,5*MINUTA);
-                int czasKoniec = czasStart + rnd(30*MINUTA, 40*MINUTA);
+                ll czasStart = czasKoniecZaladunek + rnd(3*MINUTA,5*MINUTA);
+                ll czasKoniec = czasStart + rnd(30*MINUTA, 40*MINUTA);
                 string dataStart = obecna_data(czasStart);
                 string dataKoniec = obecna_data(czasKoniec);
                 KURSY.pb({kursId,pojazdId,kierId,magId,magId,dataStart,dataKoniec});
@@ -708,10 +765,10 @@ int main(){
                         paczkomatyDoOdwiedzenia.pb(id_p2);
                     }
                 }
-                for(int i=0; i<paczkomatyDoOdwiedzenia.size(); ++i){
-                    auto &id_p = paczkomatyDoOdwiedzenia[i];
-                    int czasP = czasKoniec*(i)+czasStart*(int(paczkomatyDoOdwiedzenia.size())-i);
-                    int czasP2 = czasKoniec*(i+1)+czasStart*(int(paczkomatyDoOdwiedzenia.size())-i-1);
+                for(int i=0; i<sz(paczkomatyDoOdwiedzenia); ++i){
+                    const auto &id_p = paczkomatyDoOdwiedzenia[i];
+                    ll czasP = (czasKoniec*(i)+czasStart*(int(paczkomatyDoOdwiedzenia.size())-i)) / (sz(paczkomatyDoOdwiedzenia)+1);
+                    ll czasP2 = (czasKoniec*(i+1)+czasStart*(int(paczkomatyDoOdwiedzenia.size())-i-1)) / (sz(paczkomatyDoOdwiedzenia)+1);
                     string dataP = obecna_data(czasP);
                     string dataO = obecna_data(czasP2);
                     // Rozładowujemy paczki z pojazdu do paczkomatu
@@ -723,7 +780,6 @@ int main(){
                             string data_odeb = obecna_data(czasP + rnd(5*MINUTA,2*GODZINA));
                             odbierzPaczke(zlecenie,data_dost,data_odeb);
                         }
-                        ZLECENIA_KURSY.pb({zlecenie, kursId, dataP});
                         it = pojazdZlecenia[pojazdId].erase(it);
                     }
                     KURSY_PACZKOMATY.pb({kursId,id_p,dataP,dataO});
@@ -733,6 +789,22 @@ int main(){
         }
         dodajSekund(1*DZIEN);
     }
+    /*each(m,MAGAZYNY){
+        cerr << "magazyn:" << m.id_magazynu << endl;
+        int cnt=0;
+        each(k,kierowcy)
+            if(m.id_magazynu == kierowcaMagazyn[k])
+                ++cnt;
+        cerr << " kierowcow: " << cnt << endl;
+        
+        cnt = 0;
+        each(p,POJAZDY)
+            if(m.id_magazynu == pojazdMagazyn[p.id_pojazdu])
+                ++cnt;
+        cerr << " pojazdów: " << cnt << endl;
+        cnt = 0;
+    }*/
+    cerr << endl;
     printEverything();
     return 0;
 }
@@ -772,7 +844,7 @@ osoba genOsoba(){
     return os;
 }
 
-bool czyKobieta(osoba os){
+bool czyKobieta(const osoba &os){
     return os.imie.back()=='a';
 }
 
@@ -789,7 +861,7 @@ pojazd genPojazd(){
     return p;
 }
 
-string genLokalizacja(string miasto){
+string genLokalizacja(const string &miasto){
     string lok = "";
     lok += miasto;
     lok += ", ";
@@ -891,150 +963,150 @@ string Insert(const string &s){
 
 void printEverything(){
     cout << Insert("uprawnienia");
-    for(int i=0; i<UPRAWNIENIA.size(); ++i){
+    for(int i=0; i<sz(UPRAWNIENIA); ++i){
         cout << to_string(UPRAWNIENIA[i]);
-        if(i!=UPRAWNIENIA.size()-1) cout << ",\n";
+        if(i!=sz(UPRAWNIENIA)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("rodzaje_pojazdow");
-    for(int i=0; i<RODZAJE_POJAZDOW.size(); ++i){
+    for(int i=0; i<sz(RODZAJE_POJAZDOW); ++i){
         cout << to_string(RODZAJE_POJAZDOW[i]);
-        if(i!=RODZAJE_POJAZDOW.size()-1) cout << ",\n";
+        if(i!=sz(RODZAJE_POJAZDOW)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("stanowiska");
-    for(int i=0; i<STANOWISKA.size(); ++i){
+    for(int i=0; i<sz(STANOWISKA); ++i){
         cout << to_string(STANOWISKA[i]);
-        if(i!=STANOWISKA.size()-1) cout << ",\n";
+        if(i!=sz(STANOWISKA)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("rodzaje_przegladow");
-    for(int i=0; i<RODZAJE_PRZEGLADOW.size(); ++i){
+    for(int i=0; i<sz(RODZAJE_PRZEGLADOW); ++i){
         cout << to_string(RODZAJE_PRZEGLADOW[i]);
-        if(i!=RODZAJE_PRZEGLADOW.size()-1) cout << ",\n";
+        if(i!=sz(RODZAJE_PRZEGLADOW)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("magazyny");
-    for(int i=0; i<MAGAZYNY.size(); ++i){
+    for(int i=0; i<sz(MAGAZYNY); ++i){
         cout << to_string(MAGAZYNY[i]);
-        if(i!=MAGAZYNY.size()-1) cout << ",\n";
+        if(i!=sz(MAGAZYNY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("paczkomaty");
-    for(int i=0; i<PACZKOMATY.size(); ++i){
+    for(int i=0; i<sz(PACZKOMATY); ++i){
         cout << to_string(PACZKOMATY[i]);
-        if(i!=PACZKOMATY.size()-1) cout << ",\n";
+        if(i!=sz(PACZKOMATY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("osoby");
-    for(int i=0; i<OSOBY.size(); ++i){
+    for(int i=0; i<sz(OSOBY); ++i){
         cout << to_string(OSOBY[i]);
-        if(i!=OSOBY.size()-1) cout << ",\n";
+        if(i!=sz(OSOBY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("stanowiska_osoby");
-    for(int i=0; i<STANOWISKA_OSOBY.size(); ++i){
+    for(int i=0; i<sz(STANOWISKA_OSOBY); ++i){
         cout << to_string(STANOWISKA_OSOBY[i]);
-        if(i!=STANOWISKA_OSOBY.size()-1) cout << ",\n";
+        if(i!=sz(STANOWISKA_OSOBY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("osoby_uprawnienia");
-    for(int i=0; i<OSOBY_UPRAWNIENIA.size(); ++i){
+    for(int i=0; i<sz(OSOBY_UPRAWNIENIA); ++i){
         cout << to_string(OSOBY_UPRAWNIENIA[i]);
-        if(i!=OSOBY_UPRAWNIENIA.size()-1) cout << ",\n";
+        if(i!=sz(OSOBY_UPRAWNIENIA)-1) cout << ",\n";
     }
     cout << ";\n\n";
     // cout << Insert("usterki");
-    // for(int i=0; i<USTERKI.size(); ++i){
+    // for(int i=0; i<sz(USTERKI); ++i){
     //     cout << to_string(USTERKI[i]);
-    //     if(i!=USTERKI.size()-1) cout << ",\n";
+    //     if(i!=sz(USTERKI)-1) cout << ",\n";
     // }
     // cout << ";\n\n";
     cout << Insert("pojazdy");
-    for(int i=0; i<POJAZDY.size(); ++i){
+    for(int i=0; i<sz(POJAZDY); ++i){
         cout << to_string(POJAZDY[i]);
-        if(i!=POJAZDY.size()-1) cout << ",\n";
+        if(i!=sz(POJAZDY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("serwis");
-    for(int i=0; i<SERWIS.size(); ++i){
+    for(int i=0; i<sz(SERWIS); ++i){
         cout << to_string(SERWIS[i]);
-        if(i!=SERWIS.size()-1) cout << ",\n";
+        if(i!=sz(SERWIS)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("przeglady_rod_pojazdy");
-    for(int i=0; i<PRZEGLADY_ROD_POJAZDY.size(); ++i){
+    for(int i=0; i<sz(PRZEGLADY_ROD_POJAZDY); ++i){
         cout << to_string(PRZEGLADY_ROD_POJAZDY[i]);
-        if(i!=PRZEGLADY_ROD_POJAZDY.size()-1) cout << ",\n";
+        if(i!=sz(PRZEGLADY_ROD_POJAZDY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("kursy");
-    for(int i=0; i<KURSY.size(); ++i){
+    for(int i=0; i<sz(KURSY); ++i){
         cout << to_string(KURSY[i]);
-        if(i!=KURSY.size()-1) cout << ",\n";
+        if(i!=sz(KURSY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("kursy_paczkomaty");
-    for(int i=0; i<KURSY_PACZKOMATY.size(); ++i){
+    for(int i=0; i<sz(KURSY_PACZKOMATY); ++i){
         cout << to_string(KURSY_PACZKOMATY[i]);
-        if(i!=KURSY_PACZKOMATY.size()-1) cout << ",\n";
+        if(i!=sz(KURSY_PACZKOMATY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     
     cout << Insert("zlecenia");
-    for(int i=0; i<ZLECENIA.size(); ++i){
+    for(int i=0; i<sz(ZLECENIA); ++i){
         cout << to_string(ZLECENIA[i]);
-        if(i!=ZLECENIA.size()-1) cout << ",\n";
+        if(i!=sz(ZLECENIA)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("zlecenia_kursy");
-    for(int i=0; i<ZLECENIA_KURSY.size(); ++i){
+    for(int i=0; i<sz(ZLECENIA_KURSY); ++i){
         cout << to_string(ZLECENIA_KURSY[i]);
-        if(i!=ZLECENIA_KURSY.size()-1) cout << ",\n";
+        if(i!=sz(ZLECENIA_KURSY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("zlecenia_magazyny");
-    for(int i=0; i<ZLECENIA_MAGAZYNY.size(); ++i){
+    for(int i=0; i<sz(ZLECENIA_MAGAZYNY); ++i){
         cout << to_string(ZLECENIA_MAGAZYNY[i]);
-        if(i!=ZLECENIA_MAGAZYNY.size()-1) cout << ",\n";
+        if(i!=sz(ZLECENIA_MAGAZYNY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("skrytki");
-    for(int i=0; i<SKRYTKI.size(); ++i){
+    for(int i=0; i<sz(SKRYTKI); ++i){
         cout << to_string(SKRYTKI[i]);
-        if(i!=SKRYTKI.size()-1) cout << ",\n";
+        if(i!=sz(SKRYTKI)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("odbiory");
-    for(int i=0; i<ODBIORY.size(); ++i){
+    for(int i=0; i<sz(ODBIORY); ++i){
         cout << to_string(ODBIORY[i]);
-        if(i!=ODBIORY.size()-1) cout << ",\n";
+        if(i!=sz(ODBIORY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("praca_osoby");
-    for(int i=0; i<PRACA_OSOBY.size(); ++i){
+    for(int i=0; i<sz(PRACA_OSOBY); ++i){
         cout << to_string(PRACA_OSOBY[i]);
-        if(i!=PRACA_OSOBY.size()-1) cout << ",\n";
+        if(i!=sz(PRACA_OSOBY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     
     cout << Insert("nadania");
-    for(int i=0; i<NADANIA.size(); ++i){
+    for(int i=0; i<sz(NADANIA); ++i){
         cout << to_string(NADANIA[i]);
-        if(i!=NADANIA.size()-1) cout << ",\n";
+        if(i!=sz(NADANIA)-1) cout << ",\n";
     }
     cout << ";\n\n";
     
     cout << Insert("deklaracja_wypakowan");
-    for(int i=0; i<DEKLARACJA_WYPAKOWAN.size(); ++i){
+    for(int i=0; i<sz(DEKLARACJA_WYPAKOWAN); ++i){
         cout << to_string(DEKLARACJA_WYPAKOWAN[i]);
-        if(i!=DEKLARACJA_WYPAKOWAN.size()-1) cout << ",\n";
+        if(i!=sz(DEKLARACJA_WYPAKOWAN)-1) cout << ",\n";
     }
     cout << ";\n\n";
 
 }
 
-void dodajMagazyn(string miasto, string nadmiasto){ // Obecnie rownowazne z dodaniem miasta
+void dodajMagazyn(const string &miasto, const string &nadmiasto){ // Obecnie rownowazne z dodaniem miasta
     int id = NEXT_MAGAZYN_ID++;
     int idNad = nadmiasto == "-" ? -1 : miastoMagazyn[nadmiasto];
     string lokacja = genLokalizacja(miasto);
@@ -1045,7 +1117,7 @@ void dodajMagazyn(string miasto, string nadmiasto){ // Obecnie rownowazne z doda
     MAGAZYNY.pb({id, lokacja});
 }
 
-void dodajPaczkomat(string miasto){
+void dodajPaczkomat(const string &miasto){
     int id_paczkomatu = NEXT_PACZKOMAT_ID++;
     string lokacja = genLokalizacja(miasto);
     PACZKOMATY.pb({id_paczkomatu,lokacja,miastoMagazyn[miasto]});
@@ -1058,12 +1130,12 @@ void dodajPaczkomat(string miasto){
     }
 }
 
-void dodajPaczkomat(string miasto, int cnt){
-    while(cnt--)
+void dodajPaczkomat(const string &miasto, const int &cnt){
+    rep(i,0,cnt)
         dodajPaczkomat(miasto);
 }
 
-int wolnaSkrytka(int paczkomat, int rozmiar){
+int wolnaSkrytka(const int &paczkomat, const int &rozmiar){
     map<int,bool> zajetaSkrytka;
     // eliminujemy id skrytek, ktore czekaja na dostarczenie paczki/odebranie jej przez odbiorce
     for(auto &[id_zle, id_skr, data_dost, data_odeb] : ODBIORY){
@@ -1080,7 +1152,7 @@ int wolnaSkrytka(int paczkomat, int rozmiar){
             for(auto &[id_z2,id_s2,data2] : NADANIA){
                 if(id_s2==id_s && data2>ostatniaData){
                     ostatniaData = data2;
-                    ostatnieZlecenie=id_z2;
+                    ostatnieZlecenie = id_z2;
                 }
             }
             if(ostatnieZlecenie==-1){
@@ -1101,7 +1173,7 @@ int wolnaSkrytka(int paczkomat, int rozmiar){
     return -1;
 }
 
-int wolneMiejsce(int pojazd){
+int wolneMiejsce(const int &pojazd){
     int rodzaj=-1,pojemnosc=-1;
     for(auto &[id_p,nr_rej,id_r] : POJAZDY){
         if(id_p==pojazd){
@@ -1120,10 +1192,11 @@ int wolneMiejsce(int pojazd){
     for(auto &id_z : pojazdZlecenia[pojazd]){
         pojemnosc -= 1<<paczkaRozmiar(id_z);
     }
-    return max(0,pojemnosc);
+    assert(pojemnosc>=0);
+    return pojemnosc;
 }
 
-int paczkaRozmiar(int zlecenie){
+int paczkaRozmiar(const int &zlecenie){
     for(auto &[id_z,id_n,id_o,id_p_o,data,roz] : ZLECENIA){
         if(zlecenie == id_z)
             return roz;
@@ -1132,16 +1205,7 @@ int paczkaRozmiar(int zlecenie){
     return -1;
 }
 
-int paczkaDocelowyMagazyn(int zlecenie){
-    for(auto &[id_z,id_n,id_o,id_p_o,data,roz] : ZLECENIA){
-        if(zlecenie == id_z)
-            return paczkomatMagazyn[klientPaczkomat[id_o]];
-    }
-    assert(false);
-    return -1;
-}
-
-int potrzebneUprawnienie(int pojazd_rodzaj){
+int potrzebneUprawnienie(const int &pojazd_rodzaj){
     for(auto &[id_r,nazwa,poj,id_upr] : RODZAJE_POJAZDOW){
         if(id_r==pojazd_rodzaj){
             return id_upr;
@@ -1151,7 +1215,7 @@ int potrzebneUprawnienie(int pojazd_rodzaj){
     return -1;
 }
 
-void odbierzPaczke(int zlecenie, string data_dostarczenia, string data_odbioru){
+void odbierzPaczke(const int &zlecenie, const string &data_dostarczenia, const string &data_odbioru){
     for(auto &[id_z,id_s,data_dost,data_odeb] : ODBIORY){
         if(id_z == zlecenie){
             data_dost = data_dostarczenia;
@@ -1160,4 +1224,152 @@ void odbierzPaczke(int zlecenie, string data_dostarczenia, string data_odbioru){
         }
     }
     assert(false && "Nie znaleziono paczki");
+}
+
+int rodzajPojazdu(const int &pojazdId){
+    for(auto &[id_poj, rej, id_rodz] : POJAZDY)
+        if(id_poj == pojazdId)
+            return id_rodz;
+    assert(false && "Nie znaleziono pojazdu");
+}
+
+bool mozeProwadzic(const int &osobaId, const int &pojazdId){
+    int pojazdRodzajId = rodzajPojazdu(pojazdId);
+    int upr = potrzebneUprawnienie(pojazdRodzajId);
+    for(auto &[id_os, id_upr] : OSOBY_UPRAWNIENIA)
+        if(id_os==osobaId && id_upr==upr)
+            return true;
+    return false;
+}
+
+osoba idToOsoba(const int &osobaId){
+    each(os,OSOBY)
+        if(os.id == osobaId)
+            return os;
+    assert(false && "Nie znaleziono osoby o danym id");
+}
+
+pojazd idToPojazd(const int &pojazdId){
+    each(poj,POJAZDY)
+        if(poj.id_pojazdu == pojazdId)
+            return poj;
+    assert(false && "Nie znaleziono pojazdu o danym id");
+}
+
+pair<pojazd,osoba> dajPojazdKierowca(const int &magazynId){
+    vi dostepniKierowcy,dostepnePojazdy;
+    each(k,kierowcy)
+        if(kierowcaMagazyn[k] == magazynId)
+            dostepniKierowcy.pb(k);
+    each(poj,POJAZDY)
+        if(pojazdMagazyn[poj.id_pojazdu] == magazynId)
+            dostepnePojazdy.pb(poj.id_pojazdu);
+    mieszaj(dostepniKierowcy);
+    mieszaj(dostepnePojazdy);
+    each(kier,dostepniKierowcy)
+        each(poj,dostepnePojazdy)
+            if(mozeProwadzic(kier,poj))
+                return {idToPojazd(poj),idToOsoba(kier)};
+    throw "Nie skompletowano pary (pojazd,kierowca)";
+}
+
+string dataNadania(const int &zlecenie){
+    each(n,NADANIA)
+        if(n.id_zlecenia==zlecenie)
+            return n.data;
+    assert(false && "Nie znaleziono zlecenia");
+}
+
+bool czyZakonczone(const int &zlecenie){
+    each(o,ODBIORY)
+        if(o.id_zlecenia==zlecenie)
+            return o.data_dostarczenia!="NULL";
+    return false;
+}
+
+int magazyn_startowy(const int &zlecenie){
+    each(z,ZLECENIA)
+        if(z.id_zlecenia == zlecenie)
+            return klientPaczkomat[z.id_nadawcy];
+    assert(false && "Nie znaleziono zlecenia");
+}
+
+int magazyn_docelowy(const int &zlecenie){
+    each(z,ZLECENIA)
+        if(z.id_zlecenia == zlecenie)
+            return klientPaczkomat[z.id_odbiorcy];
+    assert(false && "Nie znaleziono zlecenia");
+}
+
+vector<pair<int,int>> wyznaczTrasy(){
+    vector<pair<int,int>> trasy;
+    vector<tuple<int,int,int,string>> paczkiDoDostarczenia;// {id_zlecenia, id_nadawcy, id_odbiorcy, data_zlozenia}
+    each(z,ZLECENIA){
+        if(!czyZakonczone(z.id_zlecenia))
+            paczkiDoDostarczenia.pb({z.id_zlecenia,z.id_nadawcy,z.id_odbiorcy,dataNadania(z.id_zlecenia)});
+    }
+    //Pierwszenstwo maja paczki czekajace najdluzej (czy na pewno dobrze sortujemy ?)
+    sort(all(paczkiDoDostarczenia), [](const tuple<int,int,int,string> &a, const tuple<int,int,int,string> &b){
+        return get<3>(a) > get<3>(b);
+    });
+    
+    vector<bool> visStart(sz(MAGAZYNY) + 1),visKoniec(sz(MAGAZYNY) + 1);
+    for(auto &[zlecenie, id_nadawca, id_odbiorca, data] : paczkiDoDostarczenia){
+        int magazynStart = paczkomatMagazyn[klientPaczkomat[id_nadawca]];
+        int magazynKoniec = paczkomatMagazyn[klientPaczkomat[id_odbiorca]];
+        if(magazynStart!=magazynKoniec && !visStart[magazynStart] && !visKoniec[magazynKoniec]){
+            visStart[magazynStart] = 1;
+            visKoniec[magazynKoniec] = 1;
+            trasy.pb({magazynStart,magazynKoniec});   
+        }
+    }
+    fill(all(visStart),0);
+    fill(all(visKoniec),0);
+
+    rep(proba,0,100){        
+        int magazynStart = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
+        int magazynKoniec = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
+        if(magazynStart == magazynKoniec) continue;
+        trasy.pb({magazynStart,magazynKoniec});   
+        if(!visStart[magazynStart] && !visKoniec[magazynKoniec]){
+            visStart[magazynStart] = 1;
+            visKoniec[magazynKoniec] = 1;
+            trasy.pb({magazynStart,magazynKoniec});   
+        }
+    }
+    fill(all(visStart),0);
+    fill(all(visKoniec),0);
+    
+    rep(proba,0,100){        
+        int magazynStart = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
+        int magazynKoniec = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
+        if(magazynStart == magazynKoniec) continue;
+        trasy.pb({magazynStart,magazynKoniec});   
+        if(!visKoniec[magazynKoniec]){
+            visKoniec[magazynKoniec] = 1;
+            trasy.pb({magazynStart,magazynKoniec});   
+        }
+    }
+    fill(all(visStart),0);
+    fill(all(visKoniec),0);
+
+    rep(proba,0,100){        
+        int magazynStart = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
+        int magazynKoniec = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
+        if(magazynStart == magazynKoniec) continue;
+        trasy.pb({magazynStart,magazynKoniec});   
+        if(!visStart[magazynStart] || !visKoniec[magazynKoniec]){
+            visStart[magazynStart] = 1;
+            visKoniec[magazynKoniec] = 1;
+            trasy.pb({magazynStart,magazynKoniec});   
+        }
+    }
+    
+    rep(proba,0,100){        
+        int magazynStart = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
+        int magazynKoniec = MAGAZYNY[rnd(0,sz(MAGAZYNY)-1)].id_magazynu;
+        if(magazynStart == magazynKoniec) continue;
+        trasy.pb({magazynStart,magazynKoniec});   
+    }
+    return trasy;
 }
