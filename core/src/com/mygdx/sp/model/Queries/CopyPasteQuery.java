@@ -1,31 +1,28 @@
-package com.mygdx.sp.model;
+package com.mygdx.sp.model.Queries;
 
 import java.util.List;
 
-public class getWholeTable implements Query{
-    String name = "Podaj tabele";
-    int size = 1;
-
+public class CopyPasteQuery implements com.mygdx.sp.model.Query {
     @Override
     public String getQuery(List<String> args) {
         if(!check(args))return null;
-        return "select * from "+args.get(0)+";";
+        return args.get(0)+";";
     }
 
     @Override
     public Boolean check(List<String> args) {
-        if(args.size()!=size) return false;
+        if(args.size()!=1) return false;
         if(args.get(0)=="") return false;
         return true;
     }
 
     @Override
     public List<String> getFields() {
-        return List.of("Podaj nazwe tabeli");
+        return List.of("Podaj zapytanie");
     }
     @Override
     public String toString()
     {
-        return name;
+        return "Zapytanie";
     }
 }

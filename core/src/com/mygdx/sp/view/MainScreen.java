@@ -14,7 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.sp.model.Query;
-import com.mygdx.sp.model.getQuieres;
+import com.mygdx.sp.model.GetQueries;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -56,7 +56,7 @@ public class MainScreen implements Screen {
         stage.addActor(table);
 
         SelectBox<Query> selectBox = new SelectBox<>(skin);
-        selectBox.setItems(getQuieres.getQuieres());
+        selectBox.setItems(GetQueries.getQuieres());
 
         // Utwórz przycisk
         TextButton button = new TextButton("Submit", skin);
