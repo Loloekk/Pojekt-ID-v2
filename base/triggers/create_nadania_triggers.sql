@@ -5,7 +5,7 @@ begin
         raise exception 'Ta przesyłka została już nadana.';
         return null;
     end if;
-    if (select count(*) from zlecenia z left join zlecenia_kursy zk on zk.id_zlecenia = z.id_zlecenia left join nadania n on n.id_zlecenia = z.id_zlecenia where n.id_skrytki = new.id_skrytki and zk.id_kursu is null) + (select count(*) from odbiory o where o.id_skrytki = new.id_skrytki and o.data_odebrania is null) > 0 then
+    if isEmptySkrytki(new.id_skrytki) is not null then
         raise exception 'Zajęta skrytka';
         return null;
     end if;

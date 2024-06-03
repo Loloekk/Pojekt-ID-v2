@@ -1,11 +1,14 @@
 create or replace function insert_odbiory() returns trigger as
 $insert_odbiory$
+declare 
+zlecenie numeric(12,0);
 begin
     if (select count(*) from odbiory o where i.id_zlecenia = new.id_zlecenia) > 0 then 
         raise exception 'Ta przesyłka już ma zarejestrowaną skrytkę.';
         return null;
     end if;
-    if (select count(*) from zlecenia z left join zlecenia_kursy zk on zk.id_zlecenia = z.id_zlecenia left join odbiory o on o.id_zlecenia = z.id_zlecenia where o.id_skrytki = new.id_skrytki and zk.id_kursu is null) + (select count(*) from odbiory o where o.id_skrytki = new.id_skrytki and o.data_odebrania is null) > 0 then
+    zlecenie := isEmptySkrytki(new.id_skrytki);
+    if zlecenie is not null and zlecenie != new.id_zlecenia then
         raise exception 'Zajęta skrytka';
         return null;
     end if;
