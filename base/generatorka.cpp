@@ -390,7 +390,7 @@ vector<int> kierowcy; // {osobaId}; jezdza w losowe miejsca
 int main(){
     ios_base::sync_with_stdio(0);
     cin.tie(0);
-    ustawCzas((-1)*3600 + 24*3600*50*365 + 24*3600*13); // 2020-01-02 00:00:00
+    ustawCzas((-1)*3600 + 24*3600*54*365 + 24*3600*166 - 3600); // 2024-01-01 00:00:00
     OSOBY.pb({NEXT_OSOBA_ID++,"0","N","N","-","-"});
     const osoba NN = OSOBY.back();
 
