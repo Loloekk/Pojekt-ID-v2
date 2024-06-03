@@ -390,7 +390,7 @@ vector<int> kierowcy; // {osobaId}; jezdza w losowe miejsca
 int main(){
     ios_base::sync_with_stdio(0);
     cin.tie(0);
-    ustawCzas((-1)*3600 + 24*3600*54*365 + 24*3600*107 - 3600); // 2024-04-01 00:00:00
+    ustawCzas((-1)*3600 + 24*3600*54*365 + 24*3600*166 - 3600); // 2024-01-01 00:00:00
     OSOBY.pb({NEXT_OSOBA_ID++,"0","N","N","-","-"});
     const osoba NN = OSOBY.back();
 
@@ -600,6 +600,7 @@ int main(){
             string dataZakonczenia = obecna_data(czasDzien + 8*GODZINA - rnd(0,3*MINUTA));
             PRACA_OSOBY.pb({kierId, magId, 2, dataRozpoczecia, dataZakonczenia});
         }
+        
         // godzina 10:00:00 - 11:00:00
         // Kierowcy zbieraja paczki z paczkomatow nalezacych do okolicznego magazynu
         {
@@ -625,12 +626,13 @@ int main(){
                 int idKursu = NEXT_KURS_ID++; // Kurs od magazynu do siebie samego - wyzbieranie paczek
                 ll czasStart = czasDzien+rnd(1*MINUTA,5*MINUTA);
                 ll czasKoniec = czasDzien+rnd(40*MINUTA,45*MINUTA);
+                
                 string dataStart = obecna_data(czasStart);
                 string dataKoniec = obecna_data(czasKoniec);
                 for(int i=0; i<sz(paczkomatyDoWyzbierania); ++i){
                     const auto &id_p = paczkomatyDoWyzbierania[i];
-                    ll czasP = (czasKoniec*(i)+czasStart*(sz(paczkomatyDoWyzbierania)-i)) / (sz(paczkomatyDoWyzbierania)+1);
-                    ll czasP2 = (czasKoniec*(i+1)+czasStart*(sz(paczkomatyDoWyzbierania)-i-1)) / (sz(paczkomatyDoWyzbierania)+1);
+                    ll czasP = (czasKoniec*(i)+czasStart*(sz(paczkomatyDoWyzbierania)-i)) / (sz(paczkomatyDoWyzbierania));
+                    ll czasP2 = (czasKoniec*(i+1)+czasStart*(sz(paczkomatyDoWyzbierania)-i-1)) / (sz(paczkomatyDoWyzbierania));
                     string dataP = obecna_data(czasP);
                     string dataO = obecna_data(czasP2);
                     // Ładujemy paczki z paczkomatu do pojazdu
@@ -770,8 +772,8 @@ int main(){
                 }
                 for(int i=0; i<sz(paczkomatyDoOdwiedzenia); ++i){
                     const auto &id_p = paczkomatyDoOdwiedzenia[i];
-                    ll czasP = (czasKoniec*(i)+czasStart*(int(paczkomatyDoOdwiedzenia.size())-i)) / (sz(paczkomatyDoOdwiedzenia)+1);
-                    ll czasP2 = (czasKoniec*(i+1)+czasStart*(int(paczkomatyDoOdwiedzenia.size())-i-1)) / (sz(paczkomatyDoOdwiedzenia)+1);
+                    ll czasP = (czasKoniec*(i)+czasStart*(int(paczkomatyDoOdwiedzenia.size())-i)) / (sz(paczkomatyDoOdwiedzenia));
+                    ll czasP2 = (czasKoniec*(i+1)+czasStart*(int(paczkomatyDoOdwiedzenia.size())-i-1)) / (sz(paczkomatyDoOdwiedzenia));
                     string dataP = obecna_data(czasP);
                     string dataO = obecna_data(czasP2);
                     // Rozładowujemy paczki z pojazdu do paczkomatu
