@@ -42,3 +42,13 @@ begin
 end;
 $$
 language plpgsql;
+
+create or replace function getWymaganeUprawnieniePojazdu(id_pojazd int) returns int as
+$$
+begin
+    return (select up.id_uprawnienia from pojazdy p join rodzaje_pojazdow rp using(id_rodzaju) where p.id_pojazdu = id_pojazd);
+    exception when others then return null;
+
+end;
+$$
+language plpgsql;

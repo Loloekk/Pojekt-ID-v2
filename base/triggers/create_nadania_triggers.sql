@@ -14,5 +14,5 @@ end;
 $insert_nadania$
 language plpgsql;
 
-drop trigger if exists tr_nadania on nadania;
-create trigger tr_nadania before insert on nadania for each row execute procedure insert_nadania();
+drop trigger if exists tr_insert_nadania on nadania;
+create trigger tr_insert_nadania before insert on nadania for each row execute procedure insert_nadania();

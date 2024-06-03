@@ -60,3 +60,12 @@ begin
 end;
 $$
 language plpgsql;
+
+create or replace function hasUprawnienieOsoby(id_osoba int, id_uprawnienie int) returns boolean as
+$$
+begin
+    if (select count(*) from osoby_uprawnienia ou where ou.id_osoby = id_osoba and ou.id_uprawnienia = id_uprawnienie) > 0 then return true; end if;
+    return false; 
+end;
+$$
+language plpgsql;
