@@ -23,8 +23,8 @@ begin
 end;
 $insert_odbiory$
 language plpgsql;
-
-create or replace trigger tr_insert_odbiory before insert on odbiory for each row execute procedure insert_odbiory();
+drop trigger if exists tr_insert_odbiory on odbiory;
+create trigger tr_insert_odbiory before insert on odbiory for each row execute procedure insert_odbiory();
 
 
 create or replace function update_odbiory() returns trigger as
@@ -57,4 +57,5 @@ end;
 $update_odbiory$
 language plpgsql;
 
-create or replace trigger tr_update_odbiory before update on odbiory for each row execute procedure update_odbiory();
+drop trigger if exists tr_update_odbiory on odbiory;
+create trigger tr_update_odbiory before update on odbiory for each row execute procedure update_odbiory();

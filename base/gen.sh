@@ -1,5 +1,5 @@
 #!/bin/bash
-g++ -O3 -std=c++17 generatorka.cpp -o gen
+# g++ -O3 -std=c++17 generatorka.cpp -o gen
 echo ----------------------tabels > create.sql
  echo >> create.sql
  echo >> create.sql
@@ -9,7 +9,7 @@ cat create_only_tabels.sql >> create.sql
 echo ----------------------data >> create.sql
  echo >> create.sql
  echo >> create.sql
-./gen >> create.sql
+# ./gen >> create.sql
 cat usterki.sql >> create.sql
  echo >> create.sql
  echo >> create.sql
@@ -29,4 +29,4 @@ echo ----------------------rules >> create.sql
  echo >> create.sql
  echo >> create.sql
 cat create_no_delete_rules.sql >> create.sql
-rm gen
+# rm gen

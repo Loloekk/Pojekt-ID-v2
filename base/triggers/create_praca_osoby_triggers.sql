@@ -22,7 +22,8 @@ end;
 $insert_praca_osoby$
 language plpgsql;
 
-create or replace trigger tr_insert_praca_osoby before insert on praca_osoby for each row execute procedure insert_praca_osoby();
+drop trigger if exists tr_insert_praca_osoby on praca_osoby;
+create trigger tr_insert_praca_osoby before insert on praca_osoby for each row execute procedure insert_praca_osoby();
 
 create or replace function update_praca_osoby() returns trigger AS
 $update_praca_osoby$
@@ -52,4 +53,5 @@ end;
 $update_praca_osoby$
 language plpgsql;
 
-create or replace trigger tr_update_praca_osoby before update on praca_osoby for each row execute procedure update_praca_osoby();
+drop trigger if exists tr_update_praca_osoby on praca_osoby;
+create trigger tr_update_praca_osoby before update on praca_osoby for each row execute procedure update_praca_osoby();

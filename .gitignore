@@ -113,3 +113,4 @@ Thumbs.db
 /ios/IOSLauncher.app
 /ios/IOSLauncher.app.dSYM
 /tmp.sql
+/base/create.sql
