@@ -21,6 +21,7 @@ const int ILE_KIEROWCOW_NA_MAGAZYN = 10;
 const int ILE_KOMISJONEROW_NA_MAGAZYN = 5;
 const int ILE_INFORMATYKOW_NA_MAGAZYN = 2;
 const int ILE_KLIENTOW = 30000;
+const int NIEODEBRANYCH_PACZEK = 40;
 
 const int SEKUNDA = 1;
 const int MINUTA = 60;
@@ -338,6 +339,7 @@ osoba idToOsoba(const int &osobaId);
 pojazd idToPojazd(const int &pojazdId);
 vector<pair<int,int>> wyznaczTrasy(); // Zwraca zbiór par {A,B} takich, że pasuje wykonać kurs z magazynu A do magazynu B
 string dataNadania(const int &zlecenie);
+bool czySkrytkaWolna(const int &skrytka);
 
 
 vector<osoba> OSOBY;
@@ -734,7 +736,7 @@ int main(){
                 string dataKoniecRozladunek = obecna_data(czasKoniecRozladunek);
                 DEKLARACJA_WYPAKOWAN.pb({kursId,dataKoniecRozladunek});
             }
-            cerr << "Trasy:" << cnt << endl;
+            // cerr << cnt;
         }
         czasDzien = 17*GODZINA;
         // godzina: 17:00:00 - 18:00:00 
@@ -812,24 +814,25 @@ int main(){
         }
         dodajSekund(1*DZIEN);
     }
+    // Usun odbiory z kilku paczek ostatnich 
+    assert((NIEODEBRANYCH_PACZEK <= ODBIORY.size()) && "Za mało odbiorów");
+    rep(p,0,NIEODEBRANYCH_PACZEK){
+        for(int i=sz(ODBIORY)-1; i>=0; --i){
+            if(rnd(1,10)==1){
+                if(czySkrytkaWolna(ODBIORY[i].id_skrytki) && ODBIORY[i].data_odebrania!="NULL")
+                    ODBIORY[i].data_odebrania = "NULL";
+                break;
+            }
+        }
+    }
+
     cerr << endl;
     int cntAll=0,cntDone=0;
     each(o,ODBIORY){
         ++cntAll;
         cntDone += o.data_dostarczenia!="NULL";
     }
-    cerr << " DOSTARCZONO: " << cntDone << "/" << cntAll << " (" <<  (100*cntDone/cntAll) << "%)" << endl;
-    // each(m,MAGAZYNY){
-    //     cerr << "MAGAZYN:" << m.id_magazynu << endl;
-    //     for(auto &p : PACZKOMATY){
-    //         cerr << " p:" << p.id_paczkomatu << endl;
-    //         cerr << "  z:";
-    //         for(const auto &z : paczkomatZlecenia[p.id_paczkomatu]){
-    //             cerr << " (" << z << "," << magazyn_docelowy(z) << ")";
-    //         }
-    //         cerr << endl;
-    //     }
-    // }
+    cerr << " Dostarczono: " << cntDone << "/" << cntAll << " (" <<  (100*cntDone/cntAll) << "%)" << endl;
     printEverything();
     return 0;
 }
@@ -1147,7 +1150,7 @@ void dodajPaczkomat(const string &miasto){
     string lokacja = genLokalizacja(miasto);
     PACZKOMATY.pb({id_paczkomatu,lokacja,miastoMagazyn[miasto]});
     paczkomatMagazyn[id_paczkomatu] = miastoMagazyn[miasto];
-    int ileSkrytek = rnd(100,300) /5 * 5;
+    int ileSkrytek = rnd(50,300) / 5 * 5;
     rep(i,0,ileSkrytek){
         int id_skrytki = NEXT_SKRYTKA_ID++;
         int rozmiar = rnd(1,3);
