@@ -105,7 +105,7 @@ public class QueryScreen implements Screen
 
                     if(query.getQuery(input) == null) return;
                     String command = "echo \"" + query.getQuery(input) + "\" > " + tmpSqlFile.getAbsolutePath();
-
+                    System.out.println(query.getQuery(input));
                     ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
                     processBuilder.redirectErrorStream(true);
 

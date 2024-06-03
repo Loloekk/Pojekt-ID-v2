@@ -57,7 +57,7 @@ CREATE TABLE rodzaje_pojazdow(
     id_rodzaju INT PRIMARY KEY,
     nazwa VARCHAR(50) NOT NULL,
     pojemnosc INT NOT NULL,
-    id_uprawnienia INT REFERENCES uprawnienia(id_uprawnienia)
+    id_uprawnienia INT NOT NULL REFERENCES uprawnienia(id_uprawnienia)
 );
 
 CREATE TABLE pojazdy(
@@ -85,7 +85,7 @@ CREATE TABLE przeglady_rod_pojazdy(
     id_rodzaju INT NOT NULL REFERENCES rodzaje_pojazdow(id_rodzaju),
     id_przegladu INT NOT NULL REFERENCES rodzaje_przegladow(id_przegladu),
     czestotliwosc INT NOT NULL,
-    CONSTRAINT pk_przeglady_rod_pojazdy PRIMARY KEY(id_rodzaju,id_przegladu,czestotliwosc)
+    CONSTRAINT pk_przeglady_rod_pojazdy PRIMARY KEY(id_rodzaju,id_przegladu)
 );
 
 CREATE TABLE serwis(
