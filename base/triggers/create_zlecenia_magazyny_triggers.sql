@@ -1,5 +1,6 @@
 create or replace function insert_zlecenia_magazyny() returns trigger as
 $$
+declare
 kurs int;
 begin
     kurs := getKursZlecenia(new.id_zlecenia);
