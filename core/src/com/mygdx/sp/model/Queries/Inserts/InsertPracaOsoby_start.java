@@ -13,7 +13,7 @@ public class InsertPracaOsoby_start implements Query {
         String id_stanowiska = args.get(2).toString();
         if(!check(args))
             return null;
-        return "insert into praca_osoby values (" + id_osoby + "," + id_magazynu + "," + id_stanowiska + ",now(),NULL)";
+        return "insert into praca_osoby values (" + id_osoby + "," + id_magazynu + "," + id_stanowiska + ",now(),NULL);";
     }
 
     @Override

@@ -13,7 +13,7 @@ public class InsertPrzegladyRodzajePojazdy implements Query {
         String czestotliwosc = args.get(2).toString();
         if(!check(args))
             return null;
-        return "insert into przeglady_rod_pojazdy values (" + id_rodzaj_poj + "," + id_przegladu + "," + czestotliwosc + ")";
+        return "insert into przeglady_rod_pojazdy values (" + id_rodzaj_poj + "," + id_przegladu + "," + czestotliwosc + ");";
     }
 
     @Override

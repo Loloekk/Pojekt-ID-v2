@@ -10,10 +10,10 @@ public class InsertRodzajPojazdu implements Query {
     public String getQuery(List<TurboString> args) {
         String nazwa = args.get(0).toString();
         String pojemnosc = args.get(1).toString();
-        String id_uprawnienia = args.get(2).toString();
+        String uprawnienie = args.get(2).toString();
         if(!check(args))
             return null;
-        return "insert into rodzaje_pojazdow values (default, '" + nazwa + "'," + pojemnosc + "," + id_uprawnienia + ")";
+        return "insert into rodzaje_pojazdow values (default, '" + nazwa + "'," + pojemnosc + ",'" + uprawnienie + "');";
     }
 
     @Override
@@ -25,7 +25,7 @@ public class InsertRodzajPojazdu implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Nazwa", "Pojemnosc", "Id uprawnienia");
+        return List.of("Nazwa", "Pojemnosc", "Uprawnienie");
     }
     @Override
     public String toString()

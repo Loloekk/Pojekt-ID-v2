@@ -11,7 +11,7 @@ public class InsertRodzajePrzegladow implements Query {
         String nazwa = args.get(0).toString();
         if(!check(args))
             return null;
-        return "insert into rodzaje_przegladow values (default, '" + nazwa + "')";
+        return "insert into rodzaje_przegladow values (default, '" + nazwa + "');";
     }
 
     @Override

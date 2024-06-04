@@ -11,7 +11,7 @@ public class InsertStanowisko implements Query {
         String nazwa = args.get(0).toString();
         if(!check(args))
             return null;
-        return "insert into stanowiska values (default, '" + nazwa + "')";
+        return "insert into stanowiska values (default, '" + nazwa + "');";
     }
 
     @Override

@@ -11,7 +11,7 @@ public class InsertUprawnienia implements Query {
         String nazwa = args.get(0).toString();
         if(!check(args))
             return null;
-        return "insert into uprawnienia values (default," + nazwa + ")";
+        return "insert into uprawnienia values (default," + nazwa + ");";
     }
 
     @Override

@@ -12,7 +12,7 @@ public class InsertOsobyUprawnienia implements Query {
         String id_uprawnienia = args.get(1).toString();
         if(!check(args))
             return null;
-        return "insert into osoby_uprawnienia values (" + id_osoby + "," + id_uprawnienia + ")";
+        return "insert into osoby_uprawnienia values (" + id_osoby + "," + id_uprawnienia + ");";
     }
 
     @Override

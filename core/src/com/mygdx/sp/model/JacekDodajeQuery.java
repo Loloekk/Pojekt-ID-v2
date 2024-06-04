@@ -24,6 +24,20 @@ public class JacekDodajeQuery {
         list.add(new InsertPojazd());
         list.add(new InsertSerwis_start());
         list.add(new UpdateSerwis_koniec());
+        list.add(new InsertUsterka_start());
+        list.add(new UpdateUsterka_startNaprawa());
+        list.add(new UpdateUsterka_koniec());
+        list.add(new InsertMagazyn());
+        list.add(new InsertPaczuchomat());
+        list.add(new InsertSkrytka());
+        list.add(new InsertZlecenie());
+        list.add(new InsertNadanie());
+        list.add(new InsertKurs());
+        list.add(new UpdateKurs_start());
+        list.add(new UpdateKurs_koniec());
+        list.add(new InsertZlecenieKurs());
+        list.add(new InsertKursPaczuchomat());
+        list.add(new UpdateKursPaczuchomat_koniec());
         return list;
     }
 }

@@ -5,14 +5,16 @@ import com.mygdx.sp.model.TurboString;
 
 import java.util.List;
 
-public class UpdateSerwis_koniec implements Query {
+public class UpdateUsterka_startNaprawa implements Query {
     @Override
     public String getQuery(List<TurboString> args) {
         String nr_rej = args.get(0).toString();
-        String id_przeg = args.get(1).toString();
+        String opis = args.get(1).toString();
         if(!check(args))
             return null;
-        return "update serwis set data_zakonczenia = now() WHERE id_przegladu=" + id_przeg + " and id_pojazdu=" + "(SELECT id_pojazdu FROM pojazdy WHERE nr_rejestracyjny='" + nr_rej + "');";
+        return "update usterki set data_rozpoczecia_naprawy = now() " +
+                "WHERE id_pojazdu = " + "(SELECT id_pojazdu FROM pojazdy WHERE nr_rejestracyjny='" + nr_rej + "') " +
+                "AND opis='" + opis + "';";
     }
 
     @Override
@@ -23,10 +25,10 @@ public class UpdateSerwis_koniec implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Nr rejestracyjny","Id przegladu");
+        return List.of("Numer rejestracyjny", "Opis");
     }
     @Override
     public String toString() {
-        return "Zakoncz serwis pojazdu";
+        return "Rozpocznij naprawe usterki";
     }
 }

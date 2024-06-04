@@ -1,18 +1,17 @@
-package com.mygdx.sp.model.Queries.Updates;
+package com.mygdx.sp.model.Queries.Inserts;
 
 import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
 import java.util.List;
 
-public class UpdatePracaOsoby_koniec implements Query {
+public class InsertMagazyn implements Query {
     @Override
     public String getQuery(List<TurboString> args) {
-        String id_osoby = args.get(0).toString();
+        String lok = args.get(0).toString();
         if(!check(args))
             return null;
-        return "update praca_osoby set data_zakonczenia = now() " +
-                "wher id_osoby= " + id_osoby + " and data_zakonczenia = null;";
+        return "insert into magazyny values (default,'" + lok + "');";
     }
 
     @Override
@@ -22,10 +21,10 @@ public class UpdatePracaOsoby_koniec implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Id osoby");
+        return List.of("Lokalizacja");
     }
     @Override
     public String toString() {
-        return "Zakoncz prace osoby";
+        return "Dodaj magazyn";
     }
 }
