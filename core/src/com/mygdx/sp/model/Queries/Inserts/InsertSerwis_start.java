@@ -14,7 +14,7 @@ public class InsertSerwis_start implements Query {
             return null;
         return "insert into serwis values ("
                 + "(SELECT id_pojazdu FROM pojazdy WHERE nr_rejestracyjny='" + nr_rej + "')"
-                + "'," + id_rodz + ");";
+                + "," + id_rodz + ",now(),NULL);";
     }
 
     @Override

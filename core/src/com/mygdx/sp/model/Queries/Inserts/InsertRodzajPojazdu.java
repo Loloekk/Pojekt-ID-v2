@@ -13,7 +13,8 @@ public class InsertRodzajPojazdu implements Query {
         String uprawnienie = args.get(2).toString();
         if(!check(args))
             return null;
-        return "insert into rodzaje_pojazdow values (default, '" + nazwa + "'," + pojemnosc + ",'" + uprawnienie + "');";
+        return "insert into rodzaje_pojazdow values (default, '" + nazwa + "'," + pojemnosc + ","
+                + "(SELECT id_uprawnienia FROM uprawnienia WHERE nazwa='" + uprawnienie + "'));";
     }
 
     @Override

@@ -18,7 +18,7 @@ public class InsertStanowiskaOsoby implements Query {
     @Override
     public Boolean check(List<TurboString> args) {
         return !args.get(0).toString().isEmpty()
-                && args.get(1).toString().isEmpty();
+                && !args.get(1).toString().isEmpty();
     }
 
     @Override

@@ -38,6 +38,11 @@ public class JacekDodajeQuery {
         list.add(new InsertZlecenieKurs());
         list.add(new InsertKursPaczuchomat());
         list.add(new UpdateKursPaczuchomat_koniec());
+        list.add(new InsertZlecenieMagazyn());
+        list.add(new InsertDeklaracjaWypakowania());
+        list.add(new InsertOdbior());
+        list.add(new UpdateOdbior_dostarczenie());
+        list.add(new UpdateOdbior_odbior());
         return list;
     }
 }

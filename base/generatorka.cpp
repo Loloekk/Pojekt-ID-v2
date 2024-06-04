@@ -244,7 +244,7 @@ int NEXT_PACZKOMAT_ID=1;
 int NEXT_SKRYTKA_ID=1;
 int NEXT_ZLECENIE_ID=1;
 
-mt19937 mt(123);
+mt19937 mt(124);
 int rnd(int a, int b){
     return mt()%(b-a+1)+a;
 }
@@ -472,7 +472,7 @@ int main(){
                 if(upr[u]){
                     OSOBY_UPRAWNIENIA.pb({kier.id,u});
                 }
-            }
+            }            
         }
     }
 
@@ -842,7 +842,7 @@ osoba genOsoba(){
     os.id = NEXT_OSOBA_ID++; 
     os.imie = imiona[rnd(0,imiona.size()-1)];
     os.nazwisko = nazwiska[rnd(0,nazwiska.size()-1)];
-    os.email = przymiotnik[rnd(0,przymiotnik.size()-1)] + "." + rzecz[rnd(0,rzecz.size()-1)] + to_string(rnd(0,10000000)) + "@" + domena[rnd(0,domena.size()-1)];
+    os.email = przymiotnik[rnd(0,przymiotnik.size()-1)] + "." + rzecz[rnd(0,rzecz.size()-1)] + to_string(rnd(0,100000)) + "@" + domena[rnd(0,domena.size()-1)];
     os.nr_tel = "+48 ";
     rep(i,0,9) os.nr_tel += char(rnd('0','9'));
     
@@ -916,25 +916,25 @@ vector<string> tokenize(string s, char sep){
 }
 
 string to_string(const osoba &os){
-    return "(" + to_string(os.id) + (os.pesel=="NULL" ? ",NULL,\'" : ",\'" + os.pesel + "\',\'") + os.imie + "\',\'" + os.nazwisko + "\',\'" + os.email + "\',\'" + os.nr_tel + "\')";
+    return "(" + (os.id==-1 ? "default" : to_string(os.id)) + (os.pesel=="NULL" ? ",NULL,\'" : ",\'" + os.pesel + "\',\'") + os.imie + "\',\'" + os.nazwisko + "\',\'" + os.email + "\',\'" + os.nr_tel + "\')";
 }
 string to_string(const pojazd &p){
-    return "(" + to_string(p.id_pojazdu) + ",\'" + p.nr_rejestracji + "\'," + to_string(p.id_rodzaju) + ")";
+    return "(" + (p.id_pojazdu==-1 ? "default" : to_string(p.id_pojazdu)) + ",\'" + p.nr_rejestracji + "\'," + to_string(p.id_rodzaju) + ")";
 }
 string to_string(const rodzaj_pojazdu &p){
-    return "(" + to_string(p.id_rodzaju) + ",\'" + p.nazwa + "\'," + to_string(p.pojemnosc) + "," + to_string(p.id_uprawnienia) + ")";
+    return "(" + (p.id_rodzaju==-1 ? "default" : to_string(p.id_rodzaju)) + ",\'" + p.nazwa + "\'," + to_string(p.pojemnosc) + "," + to_string(p.id_uprawnienia) + ")";
 }
 string to_string(const magazyn &m){
-    return "(" + to_string(m.id_magazynu) + ",\'" + m.lokalizacja + "\')";
+    return "(" + (m.id_magazynu==-1 ? "default" : to_string(m.id_magazynu)) + ",\'" + m.lokalizacja + "\')";
 }
 string to_string(const paczkomat &p){
-    return "(" + to_string(p.id_paczkomatu) + ",\'" + p.lokalizacja + "\'," + to_string(p.magazyn) + ")";
+    return "(" + (p.id_paczkomatu==-1 ? "default" : to_string(p.id_paczkomatu)) + ",\'" + p.lokalizacja + "\'," + to_string(p.magazyn) + ")";
 }
 string to_string(const uprawnienie &u){
-    return "(" + to_string(u.id_uprawnienia) + ",\'" + u.nazwa + "\')";
+    return "(" + (u.id_uprawnienia==-1 ? "default" : to_string(u.id_uprawnienia)) + ",\'" + u.nazwa + "\')";
 }
 string to_string(const stanowisko &s){
-    return "(" + to_string(s.id_stanowiska) + ",\'" + s.nazwa + "\')";
+    return "(" + (s.id_stanowiska==-1 ? "default" : to_string(s.id_stanowiska)) + ",\'" + s.nazwa + "\')";
 }
 string to_string(const osoba_uprawnienie &u){
     return "(" + to_string(u.id_osoby) + "," + to_string(u.id_uprawnienia) + ")";
@@ -952,10 +952,10 @@ string to_string(const przeglady_rodzaje_pojazdy &p){
     return "(" + to_string(p.id_rodzaju) + "," + to_string(p.id_przegladu) + "," + to_string(p.czestotliwosc) + ")";
 }
 string to_string(const rodzaje_przegladow &r){
-    return "(" + to_string(r.id_przegladu) + ",\'" + r.nazwa + "\')";
+    return "(" + (r.id_przegladu==-1 ? "default" : to_string(r.id_przegladu)) + ",\'" + r.nazwa + "\')";
 }
 string to_string(const kurs &k){
-    return "(" + to_string(k.id_kursu) + "," + to_string(k.id_pojazdu) + "," + to_string(k.id_kierowcy) + "," + to_string(k.magazyn_start) + "," + to_string(k.magazyn_docelowy) + ",\'" + k.data_wyjazdu + "\',\'" + k.data_przyjazdu + "\')";
+    return "(" + (k.id_kursu==-1 ? "default" : to_string(k.id_kursu)) + "," + to_string(k.id_pojazdu) + "," + to_string(k.id_kierowcy) + "," + to_string(k.magazyn_start) + "," + to_string(k.magazyn_docelowy) + ",\'" + k.data_wyjazdu + "\',\'" + k.data_przyjazdu + "\')";
 }
 string to_string(const kurs_paczkomat &k){
     return "(" + to_string(k.id_kursu) + "," + to_string(k.id_paczkomatu) + ",\'" + k.data_przyjazdu + "\',\'" + k.data_odjazdu + "\')"; 
@@ -967,7 +967,7 @@ string to_string(const zlecenie_magazyn &z){
     return "(" + to_string(z.id_zlecenia) + "," + to_string(z.id_magazynu) + ",\'" + z.data + "\')";
 }
 string to_string(const zlecenie &z){
-    return "(" + to_string(z.id_zlecenia) + "," + to_string(z.id_nadawcy) + "," + to_string(z.id_odbiorcy) + "," + to_string(z.id_pacz_odb) + ",\'" + z.data_zlozenia + "\'," + to_string(z.rozmiar) + ")";
+    return "(" + (z.id_zlecenia==-1 ? "default" : to_string(z.id_zlecenia)) + "," + to_string(z.id_nadawcy) + "," + to_string(z.id_odbiorcy) + "," + to_string(z.id_pacz_odb) + ",\'" + z.data_zlozenia + "\'," + to_string(z.rozmiar) + ")";
 }
 string to_string(const odbior &o){
     return "(" + to_string(o.id_zlecenia) + "," + to_string(o.id_skrytki) + (o.data_dostarczenia=="NULL" ? ",NULL," : ",\'" + o.data_dostarczenia + "\',") + (o.data_odebrania=="NULL" ? "NULL)" : "\'" + o.data_odebrania + "\')");
@@ -979,7 +979,7 @@ string to_string(const praca_osoba &po){
     return "(" + to_string(po.id_osoby) + "," + to_string(po.id_magazynu) + "," + to_string(po.id_stanowiska) + ",\'" + po.data_rozpoczecia + "\',\'" + po.data_zakonczenia + "\')";
 }
 string to_string(const skrytka &s){
-    return "(" + to_string(s.id_skrytki) + "," + to_string(s.id_paczkomatu) + "," + to_string(s.rozmiar) + ")";
+    return "(" + (s.id_skrytki==-1 ? "default" : to_string(s.id_skrytki)) + "," + to_string(s.id_paczkomatu) + "," + to_string(s.rozmiar) + ")";
 }
 string to_string(const deklaracja_wypakowania &d){
     return "(" + to_string(d.id_kursu) + ",\'" + d.data + "\')";
@@ -992,42 +992,49 @@ string Insert(const string &s){
 void printEverything(){
     cout << Insert("uprawnienia");
     for(int i=0; i<sz(UPRAWNIENIA); ++i){
+        UPRAWNIENIA[i].id_uprawnienia=-1;
         cout << to_string(UPRAWNIENIA[i]);
         if(i!=sz(UPRAWNIENIA)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("rodzaje_pojazdow");
     for(int i=0; i<sz(RODZAJE_POJAZDOW); ++i){
+        RODZAJE_POJAZDOW[i].id_rodzaju = -1;
         cout << to_string(RODZAJE_POJAZDOW[i]);
         if(i!=sz(RODZAJE_POJAZDOW)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("stanowiska");
     for(int i=0; i<sz(STANOWISKA); ++i){
+        STANOWISKA[i].id_stanowiska = -1;
         cout << to_string(STANOWISKA[i]);
         if(i!=sz(STANOWISKA)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("rodzaje_przegladow");
     for(int i=0; i<sz(RODZAJE_PRZEGLADOW); ++i){
+        RODZAJE_PRZEGLADOW[i].id_przegladu = -1;
         cout << to_string(RODZAJE_PRZEGLADOW[i]);
         if(i!=sz(RODZAJE_PRZEGLADOW)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("magazyny");
     for(int i=0; i<sz(MAGAZYNY); ++i){
+        MAGAZYNY[i].id_magazynu = -1;
         cout << to_string(MAGAZYNY[i]);
         if(i!=sz(MAGAZYNY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("paczkomaty");
     for(int i=0; i<sz(PACZKOMATY); ++i){
+        PACZKOMATY[i].id_paczkomatu = -1;
         cout << to_string(PACZKOMATY[i]);
         if(i!=sz(PACZKOMATY)-1) cout << ",\n";
     }
     cout << ";\n\n";
     cout << Insert("osoby");
     for(int i=0; i<sz(OSOBY); ++i){
+        OSOBY[i].id = -1;
         cout << to_string(OSOBY[i]);
         if(i!=sz(OSOBY)-1) cout << ",\n";
     }
@@ -1052,6 +1059,7 @@ void printEverything(){
     // cout << ";\n\n";
     cout << Insert("pojazdy");
     for(int i=0; i<sz(POJAZDY); ++i){
+        POJAZDY[i].id_pojazdu = -1;
         cout << to_string(POJAZDY[i]);
         if(i!=sz(POJAZDY)-1) cout << ",\n";
     }
@@ -1070,6 +1078,7 @@ void printEverything(){
     cout << ";\n\n";
     cout << Insert("kursy");
     for(int i=0; i<sz(KURSY); ++i){
+        KURSY[i].id_kursu = -1;
         cout << to_string(KURSY[i]);
         if(i!=sz(KURSY)-1) cout << ",\n";
     }
@@ -1083,6 +1092,7 @@ void printEverything(){
     
     cout << Insert("zlecenia");
     for(int i=0; i<sz(ZLECENIA); ++i){
+        ZLECENIA[i].id_zlecenia = -1;
         cout << to_string(ZLECENIA[i]);
         if(i!=sz(ZLECENIA)-1) cout << ",\n";
     }
@@ -1101,6 +1111,7 @@ void printEverything(){
     cout << ";\n\n";
     cout << Insert("skrytki");
     for(int i=0; i<sz(SKRYTKI); ++i){
+        SKRYTKI[i].id_skrytki = -1;
         cout << to_string(SKRYTKI[i]);
         if(i!=sz(SKRYTKI)-1) cout << ",\n";
     }

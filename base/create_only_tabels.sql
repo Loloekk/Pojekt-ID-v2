@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS skrytki CASCADE;
 DROP TABLE IF EXISTS deklaracja_wypakowan CASCADE;
 
 CREATE TABLE osoby(
-    id_osoby INT PRIMARY KEY,
+    id_osoby SERIAL PRIMARY KEY,
     pesel CHAR(11),
     imie VARCHAR(30) NOT NULL,
     nazwisko VARCHAR(50) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE osoby(
 );
 
 CREATE TABLE stanowiska(
-    id_stanowiska NUMERIC(6,0) PRIMARY KEY,
+    id_stanowiska SERIAL PRIMARY KEY,
     nazwa VARCHAR(50) NOT NULL
 );
 
@@ -43,7 +43,7 @@ CREATE TABLE stanowiska_osoby(
 );
 
 CREATE TABLE uprawnienia(
-    id_uprawnienia INT PRIMARY KEY,
+    id_uprawnienia SERIAL PRIMARY KEY,
     nazwa VARCHAR(50) NOT NULL
 );
 
@@ -54,14 +54,14 @@ CREATE TABLE osoby_uprawnienia(
 );
 
 CREATE TABLE rodzaje_pojazdow(
-    id_rodzaju INT PRIMARY KEY,
+    id_rodzaju SERIAL PRIMARY KEY,
     nazwa VARCHAR(50) NOT NULL,
     pojemnosc INT NOT NULL,
     id_uprawnienia INT NOT NULL REFERENCES uprawnienia(id_uprawnienia)
 );
 
 CREATE TABLE pojazdy(
-    id_pojazdu INT PRIMARY KEY,
+    id_pojazdu SERIAL PRIMARY KEY,
     nr_rejestracyjny VARCHAR(12) NOT NULL UNIQUE,
     id_rodzaju INT NOT NULL REFERENCES rodzaje_pojazdow(id_rodzaju)
 );
@@ -77,7 +77,7 @@ CREATE TABLE usterki(
 );
 
 CREATE TABLE rodzaje_przegladow(
-    id_przegladu INT PRIMARY KEY,
+    id_przegladu SERIAL PRIMARY KEY,
     nazwa VARCHAR(200) NOT NULL
 );
 
@@ -98,7 +98,7 @@ CREATE TABLE serwis(
 );
 
 CREATE TABLE magazyny(
-    id_magazynu INT PRIMARY KEY,
+    id_magazynu SERIAL PRIMARY KEY,
     lokalizacja VARCHAR(200) NOT NULL
 );
 
@@ -112,13 +112,13 @@ CREATE TABLE praca_osoby(
 );
 
 CREATE TABLE paczkomaty(
-    id_paczkomatu INT PRIMARY KEY,
+    id_paczkomatu SERIAL PRIMARY KEY,
     lokalizacja VARCHAR(200) NOT NULL,
     magazyn INT NOT NULL REFERENCES magazyny(id_magazynu)
 );
 
 CREATE TABLE zlecenia(
-    id_zlecenia NUMERIC(12,0) PRIMARY KEY,
+    id_zlecenia SERIAL PRIMARY KEY,
     id_nadawcy INT NOT NULL REFERENCES osoby(id_osoby),
     id_odbiorcy INT NOT NULL REFERENCES osoby(id_osoby),
     id_pacz_odb INT NOT NULL REFERENCES paczkomaty(id_paczkomatu),
@@ -128,7 +128,7 @@ CREATE TABLE zlecenia(
 );
 
 CREATE TABLE kursy(
-    id_kursu INT PRIMARY KEY,
+    id_kursu SERIAL PRIMARY KEY,
     id_pojazdu INT NOT NULL REFERENCES pojazdy(id_pojazdu),
     id_kierowcy INT NOT NULL REFERENCES osoby(id_osoby),
     magazyn_start INT NOT NULL REFERENCES magazyny(id_magazynu),
@@ -139,7 +139,7 @@ CREATE TABLE kursy(
 );
 
 CREATE TABLE zlecenia_kursy(
-    id_zlecenia NUMERIC(12,0) NOT NULL REFERENCES zlecenia(id_zlecenia),
+    id_zlecenia INT NOT NULL REFERENCES zlecenia(id_zlecenia),
     id_kursu INT NOT NULL REFERENCES kursy(id_kursu),
     "data_zapakowania" TIMESTAMP NOT NULL,
     CONSTRAINT pk_zlecenia_kursy PRIMARY KEY(id_zlecenia,id_kursu)
@@ -147,7 +147,7 @@ CREATE TABLE zlecenia_kursy(
 );
 
 CREATE TABLE zlecenia_magazyny(
-    id_zlecenia NUMERIC(12,0) NOT NULL REFERENCES zlecenia(id_zlecenia),
+    id_zlecenia INT NOT NULL REFERENCES zlecenia(id_zlecenia),
     id_magazynu INT NOT NULL REFERENCES magazyny(id_magazynu),
     "data_rozpakowania" TIMESTAMP NOT NULL,
     CONSTRAINT pk_zlecenia_magazyny PRIMARY KEY (id_zlecenia,id_magazynu,data_rozpakowania)
@@ -162,15 +162,15 @@ CREATE TABLE kursy_paczkomaty(
 );
 
 CREATE TABLE skrytki(
-    id_skrytki NUMERIC(12,0) PRIMARY KEY,
+    id_skrytki SERIAL PRIMARY KEY,
     id_paczkomatu INT NOT NULL REFERENCES paczkomaty(id_paczkomatu),
     rozmiar INT NOT NULL,
     CONSTRAINT rozmiary_skrytek CHECK (rozmiar IN(1,2,3))
 );
 
 CREATE TABLE odbiory(
-    id_zlecenia NUMERIC(12,0) NOT NULL REFERENCES zlecenia(id_zlecenia),
-    id_skrytki NUMERIC(12,0) NOT NULL REFERENCES skrytki(id_skrytki),
+    id_zlecenia INT NOT NULL REFERENCES zlecenia(id_zlecenia),
+    id_skrytki INT NOT NULL REFERENCES skrytki(id_skrytki),
     data_dostarczenia TIMESTAMP,
     data_odebrania TIMESTAMP,
     CONSTRAINT pk_odbiory PRIMARY KEY (id_zlecenia),
@@ -179,8 +179,8 @@ CREATE TABLE odbiory(
 );
 
 CREATE TABLE nadania(
-    id_zlecenia NUMERIC(12,0) NOT NULL REFERENCES zlecenia(id_zlecenia),
-    id_skrytki NUMERIC(12,0) NOT NULL REFERENCES skrytki(id_skrytki),
+    id_zlecenia INT NOT NULL REFERENCES zlecenia(id_zlecenia),
+    id_skrytki INT NOT NULL REFERENCES skrytki(id_skrytki),
     "data_nadania" TIMESTAMP NOT NULL,
     CONSTRAINT pk_nadania PRIMARY KEY(id_zlecenia)
 );

@@ -5,27 +5,28 @@ import com.mygdx.sp.model.TurboString;
 
 import java.util.List;
 
-public class UpdatePracaOsoby_koniec implements Query {
+public class UpdateOdbior_odbior implements Query {
     @Override
     public String getQuery(List<TurboString> args) {
-        String id_osoby = args.get(0).toString();
+        String id_zlecenia = args.get(0).toString();
         if(!check(args))
             return null;
-        return "update praca_osoby set data_zakonczenia = now() " +
-                "where id_osoby= " + id_osoby + " and data_zakonczenia = null;";
+        return "update odbiory set data_odebrania = now() WHERE id_zlecenia = "
+                + id_zlecenia + ";";
     }
 
     @Override
     public Boolean check(List<TurboString> args) {
-        return !args.get(0).toString().isEmpty();
+        String id_zlecenia = args.get(0).toString();
+        return !id_zlecenia.isEmpty();
     }
 
     @Override
     public List<String> getFields() {
-        return List.of("Id osoby");
+        return List.of("Id zlecenia");
     }
     @Override
     public String toString() {
-        return "Zakoncz prace osoby";
+        return "Odbior zlecenia przez klienta";
     }
 }

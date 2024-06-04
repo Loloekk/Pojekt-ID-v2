@@ -6,9 +6,13 @@ import com.mygdx.sp.model.TurboString;
 import java.util.List;
 
 public class InsertOsoba implements Query {
-    TurboString imie,nazw,pesel,tel,mail;
     @Override
     public String getQuery(List<TurboString> args) {
+        TurboString imie = args.get(0);
+        TurboString nazw = args.get(1);
+        TurboString pesel = args.get(2);
+        TurboString tel = args.get(3);
+        TurboString mail = args.get(4);
         if(!check(args))
             return null;
         return "insert into osoby values (default, "
@@ -18,7 +22,6 @@ public class InsertOsoba implements Query {
                 + tel.toString() + "','"
                 + mail.toString() + "');";
     }
-
     @Override
     public Boolean check(List<TurboString> args) {
         TurboString imie = args.get(0);

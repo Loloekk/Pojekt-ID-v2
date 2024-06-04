@@ -14,8 +14,7 @@ public class KarolDodajeQuery {
         List<Query> list = new ArrayList<>();
         list.add(new GetWholeTable());
         list.add(new CopyPasteQuery());
-        list.add(new Troll());
-        /////TODO Tu dodajemy kolejne zapytania
+        //list.add(new Troll());
         return list;
     }
 }
