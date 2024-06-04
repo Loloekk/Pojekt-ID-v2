@@ -472,7 +472,7 @@ int main(){
                 if(upr[u]){
                     OSOBY_UPRAWNIENIA.pb({kier.id,u});
                 }
-            }            
+            }
         }
     }
 
@@ -842,7 +842,7 @@ osoba genOsoba(){
     os.id = NEXT_OSOBA_ID++; 
     os.imie = imiona[rnd(0,imiona.size()-1)];
     os.nazwisko = nazwiska[rnd(0,nazwiska.size()-1)];
-    os.email = przymiotnik[rnd(0,przymiotnik.size()-1)] + "." + rzecz[rnd(0,rzecz.size()-1)] + to_string(rnd(0,1000)) + "@" + domena[rnd(0,domena.size()-1)];
+    os.email = przymiotnik[rnd(0,przymiotnik.size()-1)] + "." + rzecz[rnd(0,rzecz.size()-1)] + to_string(rnd(0,10000000)) + "@" + domena[rnd(0,domena.size()-1)];
     os.nr_tel = "+48 ";
     rep(i,0,9) os.nr_tel += char(rnd('0','9'));
     
