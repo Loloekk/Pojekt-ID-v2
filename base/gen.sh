@@ -28,5 +28,5 @@ echo ----------------------trigers >> create.sql
 echo ----------------------rules >> create.sql
  echo >> create.sql
  echo >> create.sql
-cat create_no_delete_rules.sql >> create.sql
+./rules/gen_rules.sh >> create.sql
 # rm gen
