@@ -1,10 +1,6 @@
 create or replace function insert_praca_osoby() returns trigger AS
 $insert_praca_osoby$
 begin
-    if new.data_rozpoczecia > now() or new.data_rozpoczecia < now() - interval '20 seconds' then
-        raise exception 'Błędna data.';
-        return null;
-    end if; 
     if (select count(*) from praca_osoby po where po.id_osoby = new.id_osoby and (po.data_zakonczenia is null or po.data_zakonczenia > new.data_rozpoczecia)) > 0 then
         raise exception' Ta osoba już pracuje.';
         return null;

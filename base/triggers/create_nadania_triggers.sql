@@ -9,6 +9,7 @@ begin
         raise exception 'Zajęta skrytka';
         return null;
     end if;
+    insert into odbiory values (new.id_zlecenia,new.id_skrytki,new.data_nadania,null);
     return new;
 end;
 $insert_nadania$
