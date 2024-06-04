@@ -91,10 +91,10 @@ CREATE TABLE przeglady_rod_pojazdy(
 CREATE TABLE serwis(
     id_pojazdu INT NOT NULL REFERENCES pojazdy(id_pojazdu),
     id_przegladu INT NOT NULL REFERENCES rodzaje_przegladow(id_przegladu),
-    data_rozpoczecia TIMESTAMP,
+    data_rozpoczecia TIMESTAMP NOT NULL,
     data_zakonczenia TIMESTAMP, CHECK(data_rozpoczecia<data_zakonczenia),
     CONSTRAINT roz_zak_serwis CHECK(data_zakonczenia IS NULL OR data_rozpoczecia IS NOT NULL),
-    CONSTRAINT ok_serwis PRIMARY KEY(id_pojazdu,id_przegladu,data_rozpoczecia)
+    CONSTRAINT pk_serwis PRIMARY KEY(id_pojazdu,id_przegladu,data_rozpoczecia)
 );
 
 CREATE TABLE magazyny(
@@ -134,7 +134,8 @@ CREATE TABLE kursy(
     magazyn_start INT NOT NULL REFERENCES magazyny(id_magazynu),
     magazyn_docelowy INT NOT NULL REFERENCES magazyny(id_magazynu),
     data_wyjazdu TIMESTAMP,
-    data_przyjazdu TIMESTAMP CHECK (data_wyjazdu<=data_przyjazdu)
+    data_przyjazdu TIMESTAMP CHECK (data_wyjazdu<=data_przyjazdu),
+    CONSTRAINT daty__kursy_null CHECK(data_wyjazdu IS NULL OR data_przyjazdu IS NOT NULL)
 );
 
 CREATE TABLE zlecenia_kursy(

@@ -13,7 +13,7 @@ begin
         return null;
     end if;
     if new.data_dostarczenia is not null then
-        if getPaczkomatKursu(getKursZlecenia(new.id_zlecenia)) is null or getPaczkomatSkrytki(new.id_skrytki) or getPaczkomatKursu(getKursZlecenia(new.id_zlecenia)) != getPaczkomatSkrytki(new.id_skrytki) then 
+        if getPaczkomatKursu(getKursZlecenia(new.id_zlecenia)) is null or getPaczkomatKursu(getKursZlecenia(new.id_zlecenia)) != getPaczkomatSkrytki(new.id_skrytki) then 
             raise exception 'Żaden kierowca nie jest przy tym paczkomacie';
             return null;
         end if;
@@ -38,7 +38,7 @@ begin
         return null;
     end if;
     if new.data_dostarczenia is not null and old.data_dostarczenia is null then
-        if getPaczkomatKursu(getKursZlecenia(new.id_zlecenia)) is null or getPaczkomatSkrytki(new.id_skrytki) or getPaczkomatKursu(getKursZlecenia(new.id_zlecenia)) != getPaczkomatSkrytki(new.id_skrytki) then 
+        if getPaczkomatKursu(getKursZlecenia(new.id_zlecenia)) is null  or getPaczkomatKursu(getKursZlecenia(new.id_zlecenia)) != getPaczkomatSkrytki(new.id_skrytki) then 
             raise exception 'Żaden kierowca nie jest przy tym paczkomacie';
             return null;
         end if;
@@ -47,7 +47,7 @@ begin
         raise exception 'Nie można edytować pola data_dostarczenia';
         return null;
     end if;
-    if new.data_odebrania is not null and odl.data_odebrania is null and (new.data_dostarczenia is null or new.data_dostarczenia > new.data_odebrania) then
+    if new.data_odebrania is not null and old.data_odebrania is null and (new.data_dostarczenia is null or new.data_dostarczenia > new.data_odebrania) then
         raise exception 'Błąd w datach';
         return null;
     end if; 
