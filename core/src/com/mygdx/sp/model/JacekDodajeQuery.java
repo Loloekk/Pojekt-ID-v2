@@ -3,6 +3,7 @@ package com.mygdx.sp.model;
 import com.mygdx.sp.model.Queries.Inserts.*;
 import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.Queries.Updates.*;
+import com.mygdx.sp.model.Queries.Selects.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,10 @@ public class JacekDodajeQuery {
         list.add(new InsertOdbior());
         list.add(new UpdateOdbior_dostarczenie());
         list.add(new UpdateOdbior_odbior());
+        // Select'y
+        list.add(new SearchOsoba());
+        list.add(new SearchUprawnieniaOsoby());
+        list.add(new SearchStanowiskaOsoby());
         return list;
     }
 }
