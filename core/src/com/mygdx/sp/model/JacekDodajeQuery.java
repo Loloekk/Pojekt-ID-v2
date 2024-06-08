@@ -48,6 +48,13 @@ public class JacekDodajeQuery {
         list.add(new SearchOsoba());
         list.add(new SearchUprawnieniaOsoby());
         list.add(new SearchStanowiskaOsoby());
+        list.add(new SearchOsobaPrzepracowanychGodzin());
+        list.add(new SearchOsobaCzyPracuje());
+        list.add(new SearchOsobyNaStanowisku());
+        list.add(new SearchOsobyWMagazynie());
+        list.add(new SearchPojazdyMagazynSprawne());
+        list.add(new SearchPojazdyMagazyn());
+        list.add(new SearchPojazdyUprawnienie());
         return list;
     }
 }
