@@ -3,7 +3,7 @@ $insert_odbiory$
 declare 
 zlecenie numeric(12,0);
 begin
-    if (select count(*) from odbiory o where i.id_zlecenia = new.id_zlecenia) > 0 then 
+    if (select count(*) from odbiory o where o.id_zlecenia = new.id_zlecenia) > 0 then
         raise exception 'Ta przesyłka już ma zarejestrowaną skrytkę.';
         return null;
     end if;
@@ -37,12 +37,16 @@ begin
         raise exception 'Nie można edytować pól id_zlecenia oraz id_skrytki';
         return null;
     end if;
+
+    /* Nie zawsze jest kierowca jest wymagany, co gdy paczka ma trafic do tego samego paczkomatu/skrytki?
     if new.data_dostarczenia is not null and old.data_dostarczenia is null then
         if getPaczkomatKursu(getKursZlecenia(new.id_zlecenia)) is null  or getPaczkomatKursu(getKursZlecenia(new.id_zlecenia)) != getPaczkomatSkrytki(new.id_skrytki) then 
             raise exception 'Żaden kierowca nie jest przy tym paczkomacie';
             return null;
         end if;
     end if;
+    */
+
     if new.data_dostarczenia is not null and old.data_dostarczenia is not null and new.data_dostarczenia != old.data_dostarczenia then
         raise exception 'Nie można edytować pola data_dostarczenia';
         return null;

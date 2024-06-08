@@ -2,26 +2,18 @@ create or replace function getPaczkomatSkrytki(id_skrytka int) returns int as
 $$
 begin
     if id_skrytka is null then return null; end if;
-    return (select s.id_paczkomatu from skrytki s where s.id_sktyrki = id_skrytka);
+    return (select s.id_paczkomatu from skrytki s where s.id_skrytki = id_skrytka);
 end;
 $$
 language plpgsql;
 
-create or replace function isEmptySkrytki(id_skrytka int) returns numeric(12,0) as
+create or replace function isEmptySkrytki(skrytkaId int) returns int as
 $$
-declare 
-zlecenie numeric(12,0);
 begin
-    begin
-        zlecenie := (select n.id_zlecenia from nadania n left join odbiory o on (n.id_zlecenia = o.id_zlecenia and n.id_skrytki = o.id_skrytki) left join zlecenia_kursy zk on n.id_zlecenia = zk.id_zlecenia where n.id_skrytki = id_skrytka and zk.id_kursu is null and o.data_odebrania is null limit 1);
-            exception when others then zlecenie := null;
-    end;
-        if zlecenie is not null then return zlecenie; end if;
-    begin
-        zlecenie := (select count(*) from odbiory o where o.id_skrytki = id_skrytka and o.data_odebrania is null);
-        exception when others then zlecenie := null;
-    end;
-    if zlecenie is not null then return zlecenie; end if;
+    if (select count(*) from odbiory where data_odebrania is null and id_skrytki=skrytkaId)>0 then
+        -- Skrytka jest zarezerwowana
+        return (select id_zlecenia from odbiory where data_odebrania is null and id_skrytki=skrytkaId);
+    end if;
     return null;
 end;
 $$
