@@ -4,13 +4,13 @@ begin
     if coalesce(getMagazynPojazdu(new.id_pojazdu),-1) != new.magazyn_start then 
         raise exception 'Pojazd nie znajduje sie w tym magazynie.';
         return null; end if;
-    if coalesce(getMagazynOsoby(new.id_osoby),-1) != new.magazyn_start then 
+    if coalesce(getMagazynOsoby(new.id_kierowcy),-1) != new.magazyn_start then 
             raise exception 'Kierowca nie znajduje sie w tym magazynie.';
         return null; end if;
     if needSerwis(new.id_pojazdu) then 
             raise exception 'Pojazd wymaga serwisu.';
         return null; end if;
-    if hasUprawnienieOsoby(new.id_osoby,getWymaganeUprawnieniePojazdu(new.id_pojazdu)) then return new; end if;
+    if hasUprawnienieOsoby(new.id_kierowcy,getWymaganeUprawnieniePojazdu(new.id_pojazdu)) then return new; end if;
         raise exception 'Kierowca nie posiada wymaganych uprawnien.';
     return null;
 end;

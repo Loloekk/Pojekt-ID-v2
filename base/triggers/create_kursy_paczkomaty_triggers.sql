@@ -3,8 +3,10 @@ $$
 declare
 wyjazd timestamp;
 begin
-    wyjazd := (select k.data_wyjazdu from kursy k where k.id_kursu = new.id_kursu);
-    exception when others then return null;
+    begin
+        wyjazd := (select k.data_wyjazdu from kursy k where k.id_kursu = new.id_kursu);
+        exception when others then return null;
+    end;
     if (new.data_przyjazdu < wyjazd) then
         raise exception 'Pojazd jeszcze nie wyjechal.';
         return null;

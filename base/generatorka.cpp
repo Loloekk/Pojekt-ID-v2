@@ -29,7 +29,7 @@ const int GODZINA = MINUTA*60;
 const int DZIEN = GODZINA*24;
 
 auto rd = std::random_device {}; 
-auto random_eng = std::default_random_engine { rd() };
+auto random_eng = std::default_random_engine {};
 
 template <class T>
 void mieszaj(vector<T> &v){
