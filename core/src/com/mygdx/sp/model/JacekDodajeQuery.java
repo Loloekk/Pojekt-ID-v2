@@ -29,7 +29,7 @@ public class JacekDodajeQuery {
         list.add(new UpdateUsterka_startNaprawa());
         list.add(new UpdateUsterka_koniec());
         list.add(new InsertMagazyn());
-        list.add(new InsertPaczuchomat());
+        list.add(new InsertPaczkomat());
         list.add(new InsertSkrytka());
         list.add(new InsertZlecenie());
         list.add(new InsertNadanie());
@@ -37,8 +37,8 @@ public class JacekDodajeQuery {
         list.add(new UpdateKurs_start());
         list.add(new UpdateKurs_koniec());
         list.add(new InsertZlecenieKurs());
-        list.add(new InsertKursPaczuchomat());
-        list.add(new UpdateKursPaczuchomat_koniec());
+        list.add(new InsertKursPaczkomat());
+        list.add(new UpdateKursPaczkomat_koniec());
         list.add(new InsertZlecenieMagazyn());
         list.add(new InsertDeklaracjaWypakowania());
         list.add(new InsertOdbior());

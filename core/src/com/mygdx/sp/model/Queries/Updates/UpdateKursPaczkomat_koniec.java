@@ -1,19 +1,19 @@
-package com.mygdx.sp.model.Queries.Inserts;
+package com.mygdx.sp.model.Queries.Updates;
 
 import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
 import java.util.List;
 
-public class InsertKursPaczuchomat implements Query {
+public class UpdateKursPaczkomat_koniec implements Query {
     @Override
     public String getQuery(List<TurboString> args) {
         String id_kursu = args.get(0).toString();
         String id_paczkomat = args.get(1).toString();
         if(!check(args))
             return null;
-        return "insert into kursy_paczkomaty values(" + id_kursu
-                + "," + id_paczkomat + ",now(),NULL);";
+        return "update kursy_paczkomaty set data_odjazdu = now() WHERE id_kursu = "
+                + id_kursu + " AND id_paczkomatu = " + id_paczkomat + ";";
     }
 
     @Override
@@ -29,6 +29,6 @@ public class InsertKursPaczuchomat implements Query {
     }
     @Override
     public String toString() {
-        return "Podjedz do paczkomatu w ramach kursu";
+        return "Odjedz od paczkomatu w ramach kursu";
     }
 }

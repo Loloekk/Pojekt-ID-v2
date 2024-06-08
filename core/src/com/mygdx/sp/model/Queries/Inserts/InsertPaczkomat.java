@@ -5,7 +5,7 @@ import com.mygdx.sp.model.TurboString;
 
 import java.util.List;
 
-public class InsertPaczuchomat implements Query {
+public class InsertPaczkomat implements Query {
     @Override
     public String getQuery(List<TurboString> args) {
         String lok = args.get(0).toString();
