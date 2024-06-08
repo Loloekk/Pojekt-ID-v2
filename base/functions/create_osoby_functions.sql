@@ -3,7 +3,7 @@ $$
 begin
     if (select count(*) from praca_osoby po where po.id_osoby = id_osoba and data_zakonczenia is null) = 0
     then return null; end if;
-    return (select po.data_rozpoczecia from praca_osoby po where po.id_osoby = id_osoba and data_zakonczenia is null);
+    return (select po.data_rozpoczecia from praca_osoby po where po.id_osoby = id_osoba and data_zakonczenia is null order by 1 desc limit 1);
     exception when others then return null;
 end;
 $$
@@ -14,7 +14,7 @@ $$
 begin
     if (select count(*) from praca_osoby po where po.id_osoby = id_osoba and data_zakonczenia is null) = 0
     then return null; end if;
-    return (select po.id_magazynu from praca_osoby po where po.id_osoby = id_osoba and data_zakonczenia is null);
+    return (select po.id_magazynu from praca_osoby po where po.id_osoby = id_osoba and data_zakonczenia is null order by 1 desc limit 1);
     exception when others then return null;
 end;
 $$
@@ -23,7 +23,7 @@ language plpgsql;
 create or replace function getKursOsoby(id_osoba int) returns int as
 $$
 begin
-    return (select k.id_kursu from kursy k where k.id_osoby = id.osoba and data_przyjazdu is null);
+    return (select k.id_kursu from kursy k where k.id_kierowcy = id_osoba and data_przyjazdu is null order by k.id_kursu desc limit 1);
     exception when others then return null;
 end;
 $$
@@ -32,16 +32,16 @@ language plpgsql;
 create or replace function getLeastMagazynKursOsoby(id_osoba int) returns int as
 $$
 begin
-    return (select k.magazyn_docelowy from kursy k where k.id_osoby = id.osoba order by k.data_wyjazdu desc limit 1);
+    return (select k.magazyn_docelowy from kursy k where k.id_kierowcy = id_osoba order by k.data_wyjazdu desc limit 1);
     exception when others then return null;
 end;
 $$
 language plpgsql;
 
-create or replace function getLeastDateKursOsoby(id_osoba int) returns int as
+create or replace function getLeastDateKursOsoby(id_osoba int) returns timestamp as
 $$
 begin
-    return (select k.id_wyjazdu from kursy k where k.id_osoby = id.osoba order by k.data_wyjazdu desc limit 1);
+    return (select k.data_wyjazdu from kursy k where k.id_kierowcy = id_osoba order by k.data_wyjazdu desc limit 1);
     exception when others then return null;
 end;
 $$

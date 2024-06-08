@@ -40,7 +40,7 @@ begin
         raise exception 'Nie można edytować daty rozpoczecia';
         return null;
     end if;
-    if new.data_zakonczenia < odl.data_rozpoczecia then
+    if (new.data_rozpoczecia is null) or (new.data_zakonczenia is not null AND new.data_zakonczenia < old.data_rozpoczecia) then
         raise exception 'Błędna data';
         return null;
     end if;
