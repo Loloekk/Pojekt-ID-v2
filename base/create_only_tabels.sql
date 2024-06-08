@@ -135,7 +135,7 @@ CREATE TABLE kursy(
     magazyn_docelowy INT NOT NULL REFERENCES magazyny(id_magazynu),
     data_wyjazdu TIMESTAMP,
     data_przyjazdu TIMESTAMP CHECK (data_wyjazdu<=data_przyjazdu),
-    CONSTRAINT daty__kursy_null CHECK(data_wyjazdu IS NULL OR data_przyjazdu IS NOT NULL)
+    CONSTRAINT daty__kursy_null CHECK(data_wyjazdu IS NOT NULL)
 );
 
 CREATE TABLE zlecenia_kursy(

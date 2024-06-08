@@ -59,9 +59,17 @@ declare
 r record;
 begin
     for r in (select prp.id_przegladu, prp.czestotliwosc from pojazdy p join przeglady_rod_pojazdy prp on p.id_rodzaju = prp.id_rodzaju where p.id_pojazdu = id_pojazd) loop
-        if (select max(s.data_zakonczenia) from serwis s where s.id_pojazdu = id_pojazd and s.id_przegladu = r.id_przegladu) < now() - (r.czestotliwosc * interval '1 day') then return true; end if;
+        if (select max(s.data_zakonczenia) from serwis s where s.id_pojazdu = id_pojazd and s.id_przegladu = r.id_przegladu) < now() - (r.czestotliwosc * interval '1 month') then return true; end if;
     end loop;
     return false;
+end;
+$$
+language plpgsql;
+
+create or replace function lastSerwis(id_pojazd int, id_serwis int) returns timestamp as
+$$
+begin
+    return (select max(s.data_zakonczenia) from serwis s where s.id_pojazdu = id_pojazd and s.id_przegladu = id_serwis);
 end;
 $$
 language plpgsql;

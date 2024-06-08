@@ -55,6 +55,13 @@ public class JacekDodajeQuery {
         list.add(new SearchPojazdyMagazynSprawne());
         list.add(new SearchPojazdyMagazyn());
         list.add(new SearchPojazdyUprawnienie());
+        list.add(new SearchPojazdSerwisy());
+        list.add(new SearchPojazdUsterkiDoNaprawy());
+//        list.add(new SearchPaczkiOczekujaceKuriera());
+        list.add(new SearchPaczkiOczekujaceOdbiorcy());
+        list.add(new SearchMagazynZlecenia());
+        list.add(new SearchPojazdZlecenia());
+        list.add(new SearchKursyAktywne());
         return list;
     }
 }
