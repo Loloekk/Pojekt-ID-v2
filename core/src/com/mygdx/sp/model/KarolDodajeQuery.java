@@ -3,7 +3,6 @@ package com.mygdx.sp.model;
 import com.mygdx.sp.model.Queries.CopyPasteQuery;
 import com.mygdx.sp.model.Queries.GetWholeTable;
 import com.mygdx.sp.model.Queries.Query;
-import com.mygdx.sp.model.Queries.Troll;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -5,7 +5,7 @@ import com.mygdx.sp.model.TurboString;
 import java.util.List;
 
 public class GetWholeTable implements Query {
-    String name = "Podaj tabele";
+    String name = "Wypisz zawartosc tabeli";
     int size = 1;
 
     @Override
@@ -17,13 +17,12 @@ public class GetWholeTable implements Query {
     @Override
     public Boolean check(List<TurboString> args) {
         if(args.size()!=size) return false;
-        if(args.get(0).equals("")) return false;
-        return true;
+        return !args.get(0).toString().isEmpty();
     }
 
     @Override
     public List<String> getFields() {
-        return List.of("Podaj nazwe tabeli");
+        return List.of("Nazwa tabeli");
     }
     @Override
     public String toString()

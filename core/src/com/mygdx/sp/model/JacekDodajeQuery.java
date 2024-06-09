@@ -18,6 +18,7 @@ public class JacekDodajeQuery {
         list.add(new InsertPracaOsoby_start());
         list.add(new UpdatePracaOsoby_koniec());
         list.add(new InsertOsobyUprawnienia());
+        list.add(new SearchPojazdRejestracja());
         list.add(new InsertUprawnienia());
         list.add(new InsertRodzajPojazdu());
         list.add(new InsertRodzajePrzegladow());

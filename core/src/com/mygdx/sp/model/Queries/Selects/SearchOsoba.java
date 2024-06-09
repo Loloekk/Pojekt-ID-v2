@@ -64,6 +64,6 @@ public class SearchOsoba implements Query {
     @Override
     public String toString()
     {
-        return "Wyszukaj osoby";
+        return "Wyszukaj osoby spelniajace kryteria";
     }
 }

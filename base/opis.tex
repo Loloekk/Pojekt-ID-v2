@@ -27,7 +27,7 @@
     \begin{enumerate}
         \item \textbf{Osoby} - składa się z osób, uprawnień jakie posiadają, stanowisk jakich pracują oraz informacji o stawieniu się pracownika w pracy i zakończeniu pracy w danym dniu.
         \item \textbf{Pojazdy} - składa się z pojazdów, które posiada firma, ich rodzajów, pojemności, wymaganych serwisów (uzależnionych od rodzaju pojazdu), przeprowadzonych serwisów, usterek i ich napraw oraz wymaganych uprawnień do prowadzenia pojazdu.
-        \item \textbf{Zlecenia i kursy} - składają się z informacji o zleceniach i transporcie paczek pomiędzy paczkomatami. Dokładny opis przewozu paczki znajduje się poniżej.
+        \item \textbf{Zlecenia i kursy} - składają się z informacji o zleceniach i transporcie paczek pomiędzy paczkomatam i magazynami. Dokładny opis przewozu paczki znajduje się poniżej.
     \end{enumerate}
 \noindent 
 \section*{Historia zlecenia}
@@ -35,17 +35,17 @@
         \item Zgłoszenie zlecenia przez klienta, odnotowane w tabeli zlecenia;
         \item Włożenie paczki przez klienta do skrytki, odnotowane w nadaniach;
         \item Zabranie paczki przez kuriera (odnotowane w zlecenia\_kursy) i przewiezienie do magazynu (odnotowane w zlecenia\_magazyny) do którego przynależy dany paczkomat;
-        \item Następnie kilkukrotne przewiezenie paczki pomiędzy różnymi magazynami (odnotowane w zlecenia\_kursy i zlecenia\_magazyny);
+        \item Następnie paczka zostaje przewieziona do odpowiedniego magazynu, w pobliżu docelowego paczkomatu (zapakowanie do pojazdu odnotowane w zlecenia\_kursy i załadowanie do magazynu w zlecenia\_magazyny);
         \item W międzyczasie aplikacja logistyczna rezerwuje pustą skrytkę w paczkomacie, do którego ma trafić przesyłka (odnotowane w odbiory, obie daty równe NULL, jest to równoznaczne z zarezerwowaniem skrytki na dane zlecenie);
         \item Zawiezienie paczki do odpowiedniego paczkomatu i włożenie paczki do zarezerwowanej skrytki (odnotowane w odbiory jako data\_dostarczenia);
         \item Odebranie paczki z paczkomatu przez odbiorcę (odnotowane w odbiory jako data\_odbioru).
     \end{enumerate}
 \section*{Historia kursu}
     \begin{enumerate}
-        \item Warstwa logistyczna tworzy zlecenie do którego przyporządkowuje magazyn początkowy (magazyn\_start), magazyn docelowy, kierowcę i pojazd znajdujących się w magazynie\_start, każdy kurs odbywa się pomiędzy dwoma magazynami (być może między jednym i tym samym);
+        \item Warstwa logistyczna tworzy zlecenie do którego przyporządkowuje magazyn początkowy (magazyn\_start), magazyn docelowy, kierowcę i pojazd znajdujących się w magazynie\_start, każdy kurs odbywa się pomiędzy dwoma magazynami (być może między jednym i tym samym, oznacza to wtedy, że dany pojazd zbiera/rozwozi paczki między magazynem a pobliskimi paczkomatami);
         \item Do pojazdu przypisanego do kursu zostają zapakowane odpowiednie paczki (odnotowane w zlecenia\_kursy);
         \item Kurs wyjeżdża z magazynu (odnotowane w kursy jako data\_wyjazdu);
-        \item Jeżeli kurs zbiera/rozwozi paczki z/do paczkomatów:
+        \item *Jeżeli kurs zbiera/rozwozi paczki z/do paczkomatów:
             \begin{itemize}
                 \item Kurs zatrzymuje się przy paczkomacie (odnotowane w kursy\_paczkomaty jako data\_przyjazdu);
                 \item Następuje przepakowanie odpowiednich paczek (odnotowane w zlecenia\_kursy lub odbiory);
@@ -57,13 +57,24 @@
     \end{enumerate}
 \section*{Problemy i postawione założenia}
 	\begin{itemize}
-	\item Zdecydowaliśmy nie zajmować się systemem wypłat, oraz harmonogramem pracowników.
+	\item Zdecydowaliśmy nie zajmować się systemem wypłat oraz harmonogramem pracowników.
 	\item Początkowo chcieliśmy trzymać graf magazynów i obliczać optymalną trasę dla każdego zlecenia, jednak zdecydowaliśmy pozostawić to warstwie logistycznej, która mogła by pracować na naszej bazie.				
     \item Zakładamy, że każdy magazyn może pomieścić nieskończoną liczbę paczek.
     \item Zakładamy, że pesel jest niezmienialny.
 	\item Zakładamy, że rejestracja pojazdu jest niezmienialna.
 	\item Jeśli pojazd z pewnych przyczyn zniknie (np. zostanie ukradziony w trakcie odbywania kursu) to jest to traktowane jako usterka (której naprawą jest odzyskanie pojazdu). 
+	\item Każdy kurs ma zawsze przypisanego kierowcę. Pozycję pojazdów stwierdzamy na podstawie ostatniego przejazdu. Niestesty trudno stwiedzić, gdzie się znajduje pojazd, zanim odbędzie jakikolwiek kurs. W tym celu w tabeli \textit{osoby} znajduje się osoba ''N.N.'' odpowiedzialna za wykonanie kursów z magazynu do siebie samego każdym pojazdem. Rozwiązuje to problem stwierdzenia początkowej lokalizacji pojazdów.
 	\end{itemize}
-\section*{Plany}
-    Wprowadzimy indeksy do wyszukiwania id\_zlecenia, w większości tabel je zawierających, być może również id\_osoby lub (id\_osoby,id\_magazynu) do praca\_osoby i id\_pojazdu do serwis. Rozpatrzymy również dodanie perspektyw w celu ułatwienia dostępu do danych w bazie. Rozważymy wprowadzenie zmienialnej rejestracji pojazdów.
+\section*{Użyte struktury}
+	W bazie zastosowaliśmy następujące narzędia:
+	\begin{itemize}
+	\item Indeksy - zwiększają wydajność wyszukiwania informacji w często sprawdzanych tabelach.
+	\item Wyzwalacze - nie dopuszczają do niepoprawnego wstawienia/zedytowania krotki w bazie; są również odpowiedzialne za automatyczne wstawianie powiązanych krotek do innych tabel
+	\item Zasady - nie pozwalają na usuwanie czy edycję rekordów z tabel.
+	\item Funkcje - w związku ze stopniem zaawansowania bazy przydatne było napisanie paru pomocniczych funkcji.
+	\end{itemize}
+	Nie zdecydowaliśmy się na zastosowanie widoków.
+\section*{Aplikacja}
+	Aplikacja jest prostym interfejsem do komunikacji a bazą danych. W pierwszej kolejności należy wybrać rodzaj operacji/zapytania jakie chcemy przedsięwziąć. Następnie należy wypełnić ewentualne dane do zapytania. Po wciśnięciu przycisku ''Submit'' powinien ukazać się wynik zapytania (albo ''UPDATE''/''INSERT'' w przypadku zmiany stanu bazy). \\ 
+	Mimo swojej prostoty aplikacja umożliwia wszystkie operacje potrzebne do aktualizowania bazy. W szczególności możliwe jest wykonanie całego procesu przewozu paczki: od momentu jej nadania aż do dostarczenia jej do paczkomatu docelowego i odebrania przez adresta.
 \end{document}

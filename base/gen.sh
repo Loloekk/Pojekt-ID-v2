@@ -19,7 +19,7 @@ echo ----------------------functions >> create.sql
 ./functions/gen_functions.sh >> create.sql
  echo >> create.sql
  echo >> create.sql
-echo ----------------------trigers >> create.sql
+echo ----------------------triggers >> create.sql
  echo >> create.sql
  echo >> create.sql
 ./triggers/gen_triggers.sh >> create.sql
@@ -29,4 +29,8 @@ echo ----------------------rules >> create.sql
  echo >> create.sql
  echo >> create.sql
 ./rules/gen_rules.sh >> create.sql
+echo -----------------------indexes >> create.sql
+ echo >> create.sql
+ echo >> create.sql
+./indexes/gen_indexes.sh >> create.sql
  rm gen

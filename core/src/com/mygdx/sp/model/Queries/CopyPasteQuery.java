@@ -14,17 +14,16 @@ public class CopyPasteQuery implements Query {
     @Override
     public Boolean check(List<TurboString> args) {
         if(args.size()!=1) return false;
-        if(args.get(0).equals("")) return false;
-        return true;
+        return !args.get(0).toString().isEmpty();
     }
 
     @Override
     public List<String> getFields() {
-        return List.of("Podaj zapytanie");
+        return List.of("Komenda");
     }
     @Override
     public String toString()
     {
-        return "Zapytanie";
+        return "Komenda SQL";
     }
 }
