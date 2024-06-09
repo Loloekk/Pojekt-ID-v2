@@ -74,7 +74,19 @@
 	\item Funkcje - w związku ze stopniem zaawansowania bazy przydatne było napisanie paru pomocniczych funkcji.
 	\end{itemize}
 	Nie zdecydowaliśmy się na zastosowanie widoków.
+\section*{Uruchomienie aplikacji}
+	W celu uruchomienia aplikacji będzie konieczna Java oraz IDE umożliwiające otworzenie projektu i uruchomienie go, w naszym przypadku jest to Intellij IDEA. Aby uruchomić aplikację należy: 
+	\begin{enumerate}
+	\item Najpierw należy załadować dane z \textit{create.sql} do psql (tj. wykonać komendę ''psql < create.sql'') 
+	\item Rozpakować \textit{src.tar}
+	\item Otworzyć środowisko Intellij IDEA
+	\item Otworzyć w nim projekt (Open Folder -> {nasz rozpakowany folder})
+	\item Szukamy w projekcie po lewej pliku DesktopLauncher (./desktop/src/com/mygdx/sp/DesktopLauncher.java) i klikamy na niego dwukrotnie, by był aktywnym plikiem
+	\item Jeśli IntellijIDEA zapyta o skonfigurowanie SDK (powiadomienie w prawym górnym rogu) bądź że znalazł skrypty Gradle (powiadomienie w prawym dolnym rogu) to akceptujemy
+	\item Zieloną strzałką u góry po prawej uruchamiamy DesktopLauncher (jeśli nie jest to należy wybrać obok strzałki opcję ''Current file'')
+	\item 	Po chwili powinna uruchomić się aplikacja
+	\end{enumerate}
 \section*{Aplikacja}
-	Aplikacja jest prostym interfejsem do komunikacji a bazą danych. W pierwszej kolejności należy wybrać rodzaj operacji/zapytania jakie chcemy przedsięwziąć. Następnie należy wypełnić ewentualne dane do zapytania. Po wciśnięciu przycisku ''Submit'' powinien ukazać się wynik zapytania (albo ''UPDATE''/''INSERT'' w przypadku zmiany stanu bazy). \\ 
+	Aplikacja ma prostym interfejs do komunikacji z bazą danych. W pierwszej kolejności należy wybrać rodzaj operacji/zapytania jakie chcemy przedsięwziąć. Następnie należy wypełnić ewentualne dane do zapytania. Po wciśnięciu przycisku ''Submit'' powinien ukazać się wynik zapytania (albo ''UPDATE''/''INSERT'' w przypadku zmiany stanu bazy). \\ 
 	Mimo swojej prostoty aplikacja umożliwia wszystkie operacje potrzebne do aktualizowania bazy. W szczególności możliwe jest wykonanie całego procesu przewozu paczki: od momentu jej nadania aż do dostarczenia jej do paczkomatu docelowego i odebrania przez adresta.
 \end{document}
