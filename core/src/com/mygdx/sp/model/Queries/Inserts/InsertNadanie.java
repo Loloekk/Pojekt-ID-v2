@@ -3,6 +3,7 @@ package com.mygdx.sp.model.Queries.Inserts;
 import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class InsertNadanie implements Query {
@@ -26,7 +27,10 @@ public class InsertNadanie implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Id zlecenia", "Id skrytki");
+        List<String> l = new LinkedList<>();
+        l.add("Id zlecenia");
+        l.add("Id skrytki");
+        return l;
     }
     @Override
     public String toString() {

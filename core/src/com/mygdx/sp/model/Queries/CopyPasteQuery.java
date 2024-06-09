@@ -2,6 +2,7 @@ package com.mygdx.sp.model.Queries;
 
 import com.mygdx.sp.model.TurboString;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class CopyPasteQuery implements Query {
@@ -19,7 +20,9 @@ public class CopyPasteQuery implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Komenda");
+        List<String> l = new LinkedList<>();
+        l.add("Komenda");
+        return l;
     }
     @Override
     public String toString()

@@ -3,6 +3,7 @@ package com.mygdx.sp.model.Queries.Updates;
 import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class UpdateOdbior_dostarczenie implements Query {
@@ -23,7 +24,9 @@ public class UpdateOdbior_dostarczenie implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Id zlecenia");
+        List<String> l = new LinkedList<>();
+        l.add("Id zlecenia");
+        return l;
     }
     @Override
     public String toString() {

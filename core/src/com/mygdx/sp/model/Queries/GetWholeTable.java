@@ -2,6 +2,7 @@ package com.mygdx.sp.model.Queries;
 
 import com.mygdx.sp.model.TurboString;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class GetWholeTable implements Query {
@@ -22,7 +23,9 @@ public class GetWholeTable implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Nazwa tabeli");
+        List<String> l = new LinkedList<>();
+        l.add("Nazwa tabeli");
+        return l;
     }
     @Override
     public String toString()

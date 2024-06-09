@@ -4,6 +4,7 @@ import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
 import java.util.List;
+import java.util.LinkedList;
 
 public class InsertOsoba implements Query {
     @Override
@@ -38,7 +39,13 @@ public class InsertOsoba implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Imie","Nazwisko","PESEL","Numer telefonu","E-mail");
+        List<String> l = new LinkedList<>();
+        l.add("Imie");
+        l.add("Nazwisko");
+        l.add("PESEL");
+        l.add("Numer telefonu");
+        l.add("E-mail");
+        return l;
     }
     @Override
     public String toString()

@@ -3,6 +3,7 @@ package com.mygdx.sp.model.Queries.Inserts;
 import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class InsertKurs implements Query {
@@ -30,7 +31,12 @@ public class InsertKurs implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Id pojazdu", "Id kierowcy", "Id magazynu startowego", "Id magazynu docelowego");
+        List<String> l = new LinkedList<>();
+        l.add("Id pojazdu");
+        l.add("Id kierowcy");
+        l.add("Id magazynu startowego");
+        l.add("Id magazynu docelowego");
+        return l;
     }
     @Override
     public String toString() {

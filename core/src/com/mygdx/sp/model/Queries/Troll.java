@@ -2,6 +2,7 @@ package com.mygdx.sp.model.Queries;
 
 import com.mygdx.sp.model.TurboString;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class Troll implements Query {
@@ -22,7 +23,9 @@ public class Troll implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Podaj pesel");
+        List<String> l = new LinkedList<>();
+        l.add("Podaj pesel");
+        return l;
     }
     @Override
     public String toString()

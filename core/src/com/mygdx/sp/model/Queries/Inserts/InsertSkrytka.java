@@ -4,6 +4,7 @@ import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
 import java.util.List;
+import java.util.LinkedList;
 
 public class InsertSkrytka implements Query {
     @Override
@@ -26,7 +27,10 @@ public class InsertSkrytka implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Id paczkomatu", "Rozmiar");
+        List<String> l = new LinkedList<>();
+        l.add("Id paczkomatu");
+        l.add("Rozmiar");
+        return l;
     }
     @Override
     public String toString() {

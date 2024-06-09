@@ -3,6 +3,7 @@ package com.mygdx.sp.model.Queries.Selects;
 import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class SearchOsobaPrzepracowanychGodzin implements Query {
@@ -22,7 +23,9 @@ public class SearchOsobaPrzepracowanychGodzin implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Id osoby");
+        List<String> l = new LinkedList<>();
+        l.add("Id osoby");
+        return l;
     }
     @Override
     public String toString()

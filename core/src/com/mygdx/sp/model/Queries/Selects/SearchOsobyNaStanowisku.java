@@ -3,6 +3,7 @@ package com.mygdx.sp.model.Queries.Selects;
 import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class SearchOsobyNaStanowisku implements Query {
@@ -23,7 +24,9 @@ public class SearchOsobyNaStanowisku implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Nazwa stanowiska");
+        List<String> l = new LinkedList<>();
+        l.add("Nazwa stanowiska");
+        return l;
     }
     @Override
     public String toString()

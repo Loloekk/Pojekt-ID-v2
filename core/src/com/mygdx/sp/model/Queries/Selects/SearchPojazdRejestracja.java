@@ -4,6 +4,7 @@ import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
 import java.util.List;
+import java.util.LinkedList;
 
 public class SearchPojazdRejestracja implements Query {
     @Override
@@ -22,7 +23,9 @@ public class SearchPojazdRejestracja implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of("Numer rejestracyjny");
+        List<String> l = new LinkedList<>();
+        l.add("Numer rejestracyjny");
+        return l;
     }
     @Override
     public String toString()

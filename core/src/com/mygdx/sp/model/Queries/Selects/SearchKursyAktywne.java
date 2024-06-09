@@ -3,6 +3,7 @@ package com.mygdx.sp.model.Queries.Selects;
 import com.mygdx.sp.model.Queries.Query;
 import com.mygdx.sp.model.TurboString;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class SearchKursyAktywne implements Query {
@@ -19,7 +20,7 @@ public class SearchKursyAktywne implements Query {
 
     @Override
     public List<String> getFields() {
-        return List.of();
+        return new LinkedList<>();
     }
     @Override
     public String toString()
